@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cutesy Finds</title>
+  <meta name="description" content="Cutesy Finds – cute aesthetic finds delivered across Morocco." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Inter:wght@400;500;600;700;800&family=Mochiy+Pop+One&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f4f4f5;
+      --bg-soft-2: #e4e4e7;
+      --text-main: #09090b;
+      --text-subtle: #71717a;
+      --accent: #7b50ad;
+      --accent-soft: #d6b3ff;
+      --pill-pink: #ffa6b6;
+      --danger: #ed1367;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-soft: 0 6px 20px rgba(15, 23, 42, 0.09);
+      --cart-width: 380px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    .container { width: min(1200px, 100% - 3rem); margin-inline: auto; }
+
+    header {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: transparent;
+    }
+
+    .header-inner {
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-family: "Inter", sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.04em;
+      color: #fff;
+      z-index: 101;
+    }
+
+    nav.main-nav {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+    }
+
+    nav.main-nav a {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: opacity 0.2s;
+    }
+
+    .mobile-overlay {
+      position: fixed;
+      inset: 0;
+      background: #020617;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-overlay a {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      z-index: 101;
+    }
+
+    .pill-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 999px;
+      background: #fff;
+      color: #000;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      position: relative;
+    }
+
+    .bag-icon {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .cart-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: var(--pill-pink);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .mobile-menu-btn span {
+      width: 28px;
+      height: 3px;
+      background: #fff;
+      border-radius: 2px;
+      transition: 0.3s;
+    }
+
+    .mobile-menu-btn.active span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+    .mobile-menu-btn.active span:nth-child(2) { opacity: 0; }
+    .mobile-menu-btn.active span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+
+    #side-cart {
+      position: fixed;
+      top: 0; right: 0;
+      width: var(--cart-width);
+      height: 100%;
+      background: white;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.25);
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #side-cart.open { transform: translateX(0); }
+
+    .cart-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--bg-soft-2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cart-close {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: var(--text-subtle);
+    }
+
+    .cart-body {
+      flex: 1;
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+    }
+
+    .cart-item {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--bg-soft);
+    }
+
+    .cart-item-img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      background: #f8f9fa;
+      border-radius: var(--radius-sm);
+    }
+
+    .cart-item-info { flex: 1; }
+    .cart-item-title { font-weight: 600; margin-bottom: 0.3rem; }
+    .cart-item-price { color: var(--accent); font-weight: 600; }
+    .cart-item-remove { color: var(--danger); background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-top: 0.4rem; }
+
+    .cart-footer {
+      padding: 1.5rem 2rem;
+      border-top: 1px solid var(--bg-soft-2);
+    }
+
+    .cart-total-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .cart-checkout {
+      width: 100%;
+      padding: 1rem;
+      background: var(--text-main);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .cart-empty {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--text-subtle);
+    }
+
+    #cart-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s;
+      z-index: 150;
+    }
+
+    #cart-overlay.active { opacity: 1; visibility: visible; }
+
+    #product-modal {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      max-width: 600px;
+      width: 90%;
+      padding: 2rem;
+      z-index: 250;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    #product-modal.open {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-subtle); }
+    .modal-image { width: 100%; height: 300px; object-fit: contain; background: #f8f9fa; border-radius: var(--radius-md); margin-bottom: 1.5rem; }
+    .modal-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .modal-price { font-size: 1.4rem; color: var(--accent); font-weight: 700; margin-bottom: 1rem; }
+    .modal-description { color: var(--text-subtle); margin-bottom: 1.5rem; }
+
+    .hero {
+      position: relative;
+      padding-top: 100px;
+      color: #fafafa;
+      overflow: hidden;
+      background: #020617 url('Background.png') center / cover no-repeat;
+      min-height: clamp(500px, 75vh, 700px);
+    }
+
+    .hero.has-custom-bg::before { content: none; }
+
+    .hero:not(.has-custom-bg)::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("Cutesy Finds_files/ZuUdmoRyw0AHCWs9QD3PT9m3liQ.png") center/cover;
+      opacity: 0.4;
+      mix-blend-mode: screen;
+      z-index: 0;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      min-height: inherit;
+      align-items: center;
+    }
+
+    .hero-heading {
+      font-family: "Caveat", cursive;
+      font-size: clamp(8rem, 22vw, 16rem);
+      line-height: 0.8;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0 40px;
+    }
+
+    .hero-heading div { display: flex; }
+
+    .hero-heading span {
+      display: inline-block;
+      transition: all 0.3s ease;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .hero-heading span:hover { transform: scale(1.1); animation-play-state: paused; }
+
+.hero-heading span:nth-child(1):hover { color: #FF4D6D; }  /* hot pink */
+.hero-heading span:nth-child(2):hover { color: #FF9F1C; }  /* vibrant orange */
+.hero-heading span:nth-child(3):hover { color: #2EC4B6; }  /* teal pop */
+.hero-heading span:nth-child(4):hover { color: #4D96FF; }  /* electric blue */
+.hero-heading span:nth-child(5):hover { color: #9B5DE5; }  /* vivid purple */
+.hero-heading span:nth-child(6):hover { color: #F72585; }  /* neon magenta */
+
+
+    .hero-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-block: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    section { padding-block: 5rem; }
+    section:nth-of-type(even) { background: #f9fafb; }
+
+    .section-title {
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+    }
+
+    .product-image-wrapper {
+      background: white;
+      padding: 1.5rem;
+      min-height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .product-image {
+      max-height: 240px;
+      max-width: 100%;
+      object-fit: contain;
+      transition: transform 0.35s ease;
+    }
+
+    .product-card:hover .product-image {
+      transform: scale(1.04);
+    }
+
+    .product-info {
+      padding: 1.4rem 1.6rem;
+      text-align: center;
+    }
+
+    .product-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+      line-height: 1.3;
+    }
+
+    .product-price {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    /* ── Footer (now 500px version) ── */
+    footer {
+      background: #020617 url('Footer.png') center/cover no-repeat;
+      color: white;
+      height: 500px;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .footer-inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 1.6rem;
+      padding: 0 1.5rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .footer-love {
+      font-family: "Inter", sans-serif;
+      font-weight: 500;
+      font-size: clamp(1rem, 3vw, 1.25rem);
+      letter-spacing: 0.08em;
+      opacity: 0.85;
+    }
+
+    .footer-big-name {
+      font-family: "Mochiy Pop One", cursive;
+      font-size: clamp(4.5rem, 12vw, 110px);
+      line-height: 0.88;
+      margin: 0.3rem 0;
+      text-shadow: 0 6px 30px rgba(0,0,0,0.6);
+    }
+
+    .footer-trademark {
+      position: absolute;
+      top: 2rem;
+      right: 3rem;
+      font-family: "Inter", sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+      letter-spacing: -0.02em;
+    }
+
+    .footer-nav-social {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem 3rem;
+      margin-top: 1.5rem;
+      font-size: clamp(1rem, 3.5vw, 1.15rem);
+      font-weight: 500;
+    }
+
+    .footer-nav a:hover,
+    .footer-social a:hover {
+      color: var(--pill-pink);
+      transition: color 0.25s;
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 2.2rem;
+      font-size: clamp(2rem, 7vw, 2.6rem);
+    }
+
+    .footer-copyright {
+      margin-top: auto;
+      padding: 1.5rem 0 1rem;
+      font-size: 0.9rem;
+      opacity: 0.7;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+
+    @media (max-width: 768px) {
+      footer {
+        height: auto;
+        min-height: 520px;
+        padding: 4rem 1rem 2.5rem;
+      }
+
+      .footer-trademark {
+        top: 1.5rem;
+        right: 1.5rem;
+      }
+
+      .footer-big-name {
+        font-size: clamp(3.8rem, 13vw, 80px);
+      }
+
+      .footer-nav-social {
+        flex-direction: column;
+        gap: 1.8rem;
+      }
+
+      .footer-social {
+        gap: 2.8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .footer-love { font-size: 1rem; }
+      .footer-trademark { font-size: 1.1rem; right: 1rem; }
+      .footer-nav-social { gap: 1.6rem; }
+    }
+
+    /* Responsive for product grid etc. */
+    @media (max-width: 1024px) {
+      .product-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      nav.main-nav { display: none; }
+      .mobile-menu-btn { display: flex; }
+      .hero-heading { font-size: 7rem; line-height: 0.9; }
+      .product-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+      .product-image-wrapper { min-height: 340px; }
+      #side-cart { --cart-width: 100%; }
+    }
+
+    @media (max-width: 500px) {
+      .hero-heading { font-size: 5.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-overlay" id="mobileOverlay">
+    <a href="#hero" class="mobile-link">Home</a>
+    <a href="#products" class="mobile-link">Shop</a>
+    <a href="#collection" class="mobile-link">Collection</a>
+    <a href="#faq" class="mobile-link">FAQ</a>
+  </div>
+
+  <div id="cart-overlay"></div>
+
+  <div id="side-cart">
+    <div class="cart-header">
+      <h2>Your Bag</h2>
+      <button class="cart-close" id="cart-close">×</button>
+    </div>
+    <div class="cart-body" id="cart-items"></div>
+    <div class="cart-footer">
+      <div class="cart-total-line">
+        <span>Subtotal</span>
+        <span id="cart-total">0 DH</span>
+      </div>
+      <button class="cart-checkout" disabled>Checkout</button>
+    </div>
+  </div>
+
+  <div id="product-modal">
+    <button class="modal-close" id="modal-close">×</button>
+    <img id="modal-image" class="modal-image" src="" alt="">
+    <h2 id="modal-title" class="modal-title"></h2>
+    <div id="modal-price" class="modal-price"></div>
+    <p id="modal-description" class="modal-description"></p>
+    <button id="modal-add-to-cart" style="width:100%; padding:1rem; background:var(--pill-pink); color:white; border:none; border-radius:50px; font-weight:700; font-size:1.1rem; cursor:pointer;">Add to Bag</button>
+  </div>
+
+  <header>
+    <div class="container header-inner">
+      <a href="#hero" class="logo">Cutesy Finds®</a>
+
+      <nav class="main-nav">
+        <a href="#hero">Home</a>
+        <a href="#products">Shop</a>
+        <a href="#collection">Collection</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="pill-cta" id="cart-toggle">
+          <svg class="bag-icon" viewBox="0 0 24 24">
+            <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM17 18c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zM7 13h10l3-8H5.82L7 13zM7 3v4H4V3H1v2h3v3h3V5h12l3.29 9H7v2h12.59L16 7H9v2h6.41L14 13H7v-2z"/>
+          </svg>
+          <span class="cart-badge" id="cart-count">0</span>
+        </button>
+        <button class="mobile-menu-btn" id="menuBtn">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="hero" class="hero">
+      <div class="container hero-inner">
+        <h1 class="hero-heading" aria-label="Cutesy Finds">
+          <div><span>C</span><span>u</span><span>t</span><span>e</span><span>s</span><span>y</span></div>
+          <div><span>F</span><span>i</span><span>n</span><span>d</span><span>s</span></div>
+        </h1>
+        <div class="hero-bottom">
+          <p style="text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.8rem;">Morocco • Aesthetic Store</p>
+          <a href="#products" style="background:#fff; color:#000; padding:0.8rem 1.6rem; border-radius:50px; font-weight:700;">Shop Now</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="products">
+      <div class="container">
+        <h2 class="section-title">Our cutest picks</h2>
+        <div id="shop-grid" class="product-grid"></div>
+      </div>
+    </section>
+
+    <section id="collection">
+      <div class="container">
+        <h2 class="section-title">Explore all items</h2>
+        <div id="collection-grid" class="product-grid"></div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="container">
+        <h2 class="section-title">FAQ</h2>
+        <details open style="border-bottom:1px solid #eee; padding-bottom:1rem;">
+          <summary style="font-weight:700; cursor:pointer; list-style:none;">What is Cutesy Finds? <span>+</span></summary>
+          <p style="margin-top:1rem; opacity:0.7;">The most aesthetic store in Morocco!</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+
+      <div class="footer-trademark">Cutesy Finds®</div>
+
+      <div class="footer-love">designed with love</div>
+
+      <div class="footer-big-name">Cutesy Finds</div>
+
+      <div class="footer-nav-social">
+        <div class="footer-nav">
+          <a href="#hero">Home</a> •
+          <a href="#products">Shop</a> •
+          <a href="#collection">Collection</a> •
+          <a href="#">About Us</a>
+        </div>
+
+        <div class="footer-social">
+          <a href="https://wa.me/your-number" target="_blank">💬</a>
+          <a href="https://instagram.com/yourusername" target="_blank">📸</a>
+          <a href="https://tiktok.com/@yourusername" target="_blank">🎵</a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-copyright">
+      © 2026 Cutesy Finds. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    // Mobile Menu
+    const menuBtn = document.getElementById('menuBtn');
+    const overlay = document.getElementById('mobileOverlay');
+    function toggleMenu() {
+      menuBtn.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = overlay.classList.contains('active') ? 'hidden' : 'auto';
+    }
+    menuBtn.addEventListener('click', toggleMenu);
+    document.querySelectorAll('.mobile-link').forEach(l => l.addEventListener('click', toggleMenu));
+
+    // Hero background detection
+    window.addEventListener('load', () => {
+      const hero = document.querySelector('.hero');
+      const img = new Image();
+      img.onload = () => {
+        hero.classList.add('has-custom-bg');
+      };
+      img.onerror = () => {};
+      img.src = 'Background.png';
+    });
+
+    // Cart Logic
+    let cart = [];
+
+    const cartToggle = document.getElementById('cart-toggle');
+    const cartClose = document.getElementById('cart-close');
+    const sideCart = document.getElementById('side-cart');
+    const cartOverlay = document.getElementById('cart-overlay');
+    const cartItemsEl = document.getElementById('cart-items');
+    const cartCountEl = document.getElementById('cart-count');
+    const cartTotalEl = document.getElementById('cart-total');
+    const checkoutBtn = document.querySelector('.cart-checkout');
+
+    function openCart() {
+      sideCart.classList.add('open');
+      cartOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      renderCart();
+    }
+
+    function closeCart() {
+      sideCart.classList.remove('open');
+      cartOverlay.classList.remove('active');
+      if (!productModal.classList.contains('open')) document.body.style.overflow = 'auto';
+    }
+
+    cartToggle.addEventListener('click', openCart);
+    cartClose.addEventListener('click', closeCart);
+    cartOverlay.addEventListener('click', () => { closeCart(); closeModal(); });
+
+    function renderCart() {
+      if (cart.length === 0) {
+        cartItemsEl.innerHTML = '<div class="cart-empty">Your bag is empty ♡</div>';
+        checkoutBtn.disabled = true;
+      } else {
+        cartItemsEl.innerHTML = cart.map((item, i) => `
+          <div class="cart-item">
+            <img class="cart-item-img" src="${item.image}" alt="${item.name}">
+            <div class="cart-item-info">
+              <div class="cart-item-title">${item.name}</div>
+              <div class="cart-item-price">${item.price} DH</div>
+              <button class="cart-item-remove" data-index="${i}">Remove</button>
+            </div>
+          </div>
+        `).join('');
+        checkoutBtn.disabled = false;
+      }
+
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      cartTotalEl.textContent = total + ' DH';
+      cartCountEl.textContent = cart.length;
+
+      document.querySelectorAll('.cart-item-remove').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const idx = parseInt(e.target.dataset.index);
+          cart.splice(idx, 1);
+          renderCart();
+        });
+      });
+    }
+
+    // Modal Logic
+    const productModal = document.getElementById('product-modal');
+    const modalClose = document.getElementById('modal-close');
+    const modalImage = document.getElementById('modal-image');
+    const modalTitle = document.getElementById('modal-title');
+    const modalPrice = document.getElementById('modal-price');
+    const modalDesc = document.getElementById('modal-description');
+    const modalAddBtn = document.getElementById('modal-add-to-cart');
+
+    function openModal(product) {
+      modalImage.src = product.image;
+      modalImage.alt = product.name;
+      modalTitle.textContent = product.name;
+      modalPrice.textContent = `${product.price} DH`;
+      modalDesc.textContent = product.description;
+      productModal.classList.add('open');
+      cartOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      modalAddBtn.onclick = () => {
+        cart.push({ ...product });
+        renderCart();
+        closeModal();
+        openCart();
+      };
+    }
+
+    function closeModal() {
+      productModal.classList.remove('open');
+      cartOverlay.classList.remove('active');
+      if (!sideCart.classList.contains('open')) document.body.style.overflow = 'auto';
+    }
+
+    modalClose.addEventListener('click', closeModal);
+
+    // Products
+    const products = [
+      { id:1, name:"Pastel Cloud Lamp", price:320, image:"https://images.unsplash.com/photo-1618220048045-1a9097d8cd60?w=600", description: "A dreamy pastel cloud lamp that lights up your room with soft, colorful glows. Perfect for cozy nights!" },
+      { id:2, name:"Kawaii Strawberry Bag", price:180, image:"https://images.unsplash.com/photo-1625772299848-361b803ffa25?w=600", description: "Adorable strawberry-shaped bag with kawaii details. Carry your essentials in cute style!" },
+      { id:3, name:"Fluffy Bunny Plush Keychain", price:85, image:"https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600", description: "Super soft bunny keychain to add fluffiness to your keys or bag. Irresistibly cute!" },
+      { id:4, name:"Sanrio Style Phone Case", price:140, image:"https://images.unsplash.com/photo-1606813907291-d86f9e6be1e6?w=600", description: "Protect your phone with this Sanrio-inspired case featuring pastel colors and fun characters." },
+    ];
+
+    function renderProducts(containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = products.map(p => `
+        <div class="product-card" data-id="${p.id}">
+          <div class="product-image-wrapper">
+            <img class="product-image" src="${p.image}" alt="${p.name}">
+          </div>
+          <div class="product-info">
+            <div class="product-title">${p.name}</div>
+            <div class="product-price">${p.price} DH</div>
+          </div>
+        </div>
+      `).join('');
+
+      container.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = parseInt(card.dataset.id);
+          const product = products.find(p => p.id === id);
+          if (product) openModal(product);
+        });
+      });
+    }
+
+    renderProducts('shop-grid');
+    renderProducts('collection-grid');
+
+    renderCart(); // initial
+  </script>
+</body>
+</html>
