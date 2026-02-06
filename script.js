@@ -2,43 +2,90 @@
    Cutesy Finds - Application Logic
    ========================================= */
 
+// --- GOOGLE FORM CONFIG ---
+const GOOGLE_FORM_ID = '1FAIpQLSd0zZdALDRSoJc-zU1UpLyyoqSm43T1tBCIfTwWRiUmfdOUWA'; // Google Form ID
+const GOOGLE_FORM_ENTRY_IDS = {
+    name: 'entry.104647828',      // Name
+    phone: 'entry.1867044447',     // Phone
+    city: 'entry.956879257',       // City
+    address: 'entry.2069920131',    // Address
+    items: 'entry.274746768',     // Items
+    total: 'entry.872776128',     // Total
+    notes: 'entry.1770888457'      // Notes
+};
+const GOOGLE_FORM_URL = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_ID}/formResponse`;
+
 // --- DATA ---
 const products = [
-    { id: 1, name: "Peluche Hello Kitty", price: 450, oldPrice: 550, cat: "plushies", badge: "Best", img: "hellokitty.png", desc: "Peluche premium super douce pour un max de câlins.", variants: [{ name: "Rose", hex: "#ff8fa3" }] },
-    { id: 2, name: "Mug Nuage", price: 150, oldPrice: 0, cat: "decor", img: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=800", desc: "Mug en céramique peint à la main en forme de nuage.", variants: [{ name: "Crème", hex: "#fefae0" }] },
-    { id: 3, name: "Sac Fluffy", price: 350, oldPrice: 400, cat: "bags", badge: "New", img: "bag.jpg", desc: "Sac fourre-tout esthétique avec texture fausse fourrure.", variants: [{ name: "Blanc", hex: "#fff" }] },
-    { id: 4, name: "Pyjama Kuromi", price: 300, oldPrice: 0, cat: "accessories", img: "pijama.jpg", desc: "Ensemble pyjama super confortable et mignon.", variants: [{ name: "Mauve", hex: "#cdb4db" }] },
-    { id: 5, name: "Tapis Pastel", price: 220, oldPrice: 0, cat: "decor", img: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800", desc: "Tapis de bureau imperméable avec base antidérapante.", variants: [{ name: "Pêche", hex: "#ffc8dd" }] },
-    { id: 6, name: "Coussin Fleur", price: 280, oldPrice: 350, cat: "decor", badge: "Sale", img: "https://images.unsplash.com/photo-1584100936595-c0654b55a2e6?w=800", desc: "Coussin d'assise en peluche en forme de fleur.", variants: [{ name: "Jaune", hex: "#ffe5b4" }] },
-    { id: 7, name: "Lunettes Cœur", price: 120, oldPrice: 150, cat: "accessories", img: "ndader.jpg", desc: "Lunettes de soleil rétro en forme de cœur.", variants: [{ name: "Noir", hex: "#000" }] },
-    { id: 8, name: "Pantoufles Cinnamoroll", price: 250, oldPrice: 0, cat: "decor", img: "pantofa.jpg", desc: "Pantoufles ultra douces pour rester au chaud.", variants: [{ name: "Blanc", hex: "#fff" }] }
+    {
+        id: 1,
+        name: "Chinese Jacket",
+        price: 200,
+        oldPrice: 250,
+        cat: "autres",
+        badge: "Best",
+        img: "ChineseJacket_Purple.jpg", // Default
+        desc: "Chinese Jacket Become like a real one.",
+        variants: [
+            { name: "Mauve", hex: "#d0a2be", img: "ChineseJacket_Purple.jpg" },
+            { name: "Rose", hex: "#fdcddd", img: "ChineseJacket_Pink.jpg" },
+            { name: "Bleu", hex: "#012d6a", img: "ChineseJacket_Blue.jpg" },
+            { name: "Orange", hex: "#c44123", img: "ChineseJacket_Orange.jpg" },
+            { name: "Foncé", hex: "#d1738d", img: "ChineseJacket_Darkpink.jpg" },
+        ]
+    },
+    {
+        id: 2,
+        name: "hello kitty pijama",
+        price: 150,
+        oldPrice: 180,
+        cat: "hellokitty",
+        badge: "Best",
+        img: "hellokittypijama_White.jpg", // Default
+        desc: "hello kitty pijama For The best cozy nights.",
+        variants: [
+            { name: "Blanc", hex: "#ffffffff", img: "hellokittypijama_White.jpg" },
+            { name: "Rose", hex: "#ff4181ff", img: "hellokittypijama_Pink.jpg" },
+            { name: "Noir", hex: "#000000ff", img: "hellokittypijama_Black.jpg" },
+        ]
+    },
+    {
+        id: 3,
+        name: "Pantoufle",
+        price: 120,
+        cat: "hellokitty",
+        badge: "Best",
+        img: "Pantofa_Pink.jpg", // Default
+        desc: "hello kitty pijama For The best cozy nights.",
+        variants: [
+            { name: "Rose", hex: "#ffffffff", img: "Pantofa_Pink.jpg" },
+            { name: "Maron", hex: "#e47d4dad", img: "Pantofa_Brown.jpg" },
+        ]
+    },
+    { id: 4, name: "Sac Fluffy", price: 350, oldPrice: 400, cat: "accessoires", badge: "New", img: "bag.jpg", desc: "Sac fourre-tout esthétique avec texture fausse fourrure.", variants: [{ name: "Blanc", hex: "#fff", img: "bag.jpg" }] },
 ];
 
 // --- CONFIG: HERO SLIDES (Editable) ---
 const heroSlides = [
     {
-        image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=2000",
+        image: "Background.png",
         tag: "New Drop! 🌸",
         title: "Making your space <br>soft & dreamy.",
-        buttons: [
-            { text: "Shop Collection", action: "navigate('shop')" }
-        ]
     },
     {
-        image: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=2000",
+        image: "Background.png",
         tag: "So Fluffy! 🧸",
         title: "Huggable friends <br>for everyone.",
-        buttons: [
-            { text: "Shop Plushies", action: "filterShop('plushies'); navigate('shop');" }
-        ]
     }
 ];
 
 // --- STATE ---
-let cart = JSON.parse(localStorage.getItem('cart_v22') || '[]');
+let cart = JSON.parse(localStorage.getItem('cart_v23') || '[]'); // New version for schema change
 let activeCat = 'all';
 let historyStack = ['home'];
 let selectedCity = null;
+let activeProductId = null;
+let activeVariantIndex = 0;
 
 // --- INIT ---
 window.onload = () => {
@@ -106,7 +153,10 @@ function navigate(viewId, push = true) {
     // Special logic for shop resets
     if (viewId === 'shop') renderShop();
     // Special logic for checkout
-    if (viewId === 'checkout') renderCheckoutItems();
+    if (viewId === 'checkout') {
+        renderCheckoutItems();
+        updateCheckoutTotal();
+    }
 }
 
 function goBack() {
@@ -131,9 +181,6 @@ function createCard(p) {
       <div class="card-img-box">
         ${badgeHtml}
         <img src="${p.img}" class="card-img" alt="${p.name}" loading="lazy">
-        <button class="btn-quick-add" onclick="event.stopPropagation(); addToCart(${p.id})">
-          <span class="material-symbols-rounded">add</span>
-        </button>
       </div>
       <h3>${p.name}</h3>
       <p>${priceDisplay}</p>
@@ -174,18 +221,37 @@ function openProduct(id) {
     const p = products.find(x => x.id === id);
     if (!p) return;
 
+    activeProductId = id;
+    activeVariantIndex = 0; // Reset to first variant
+
     const container = document.getElementById('pdpContainer');
+
+    // Initial Render
+    renderPDP(p);
+    navigate('product');
+}
+
+function renderPDP(p) {
+    const container = document.getElementById('pdpContainer');
+    const currentVariant = p.variants[activeVariantIndex];
+
+    // Fallback if variant doesn't have specific img
+    const displayImg = currentVariant.img || p.img;
+
     const priceHtml = p.oldPrice > 0
         ? `<div class="price-block"><span class="price-now sale-price">${p.price} DH</span> <span class="price-was">${p.oldPrice} DH</span></div>`
         : `<div class="price-block"><span class="price-now">${p.price} DH</span></div>`;
 
     const swatches = p.variants.map((v, i) => `
-    <div class="swatch ${i === 0 ? 'selected' : ''}" style="background:${v.hex}" title="${v.name}" onclick="selectSwatch(this)"></div>
+    <div class="swatch ${i === activeVariantIndex ? 'selected' : ''}" 
+         style="background:${v.hex}" 
+         title="${v.name}" 
+         onclick="selectSwatch(${i})"></div>
   `).join('');
 
     container.innerHTML = `
     <div class="pdp-visual">
-       <img src="${p.img}" alt="${p.name}">
+       <img src="${displayImg}" alt="${p.name}" id="pdpImage" class="fade-in-img">
     </div>
     <div class="pdp-content">
        <h1>${p.name}</h1>
@@ -196,46 +262,55 @@ function openProduct(id) {
        ${priceHtml}
        <p style="font-size:1.1rem; color:var(--text-gray); margin-bottom:30px; line-height:1.7;">${p.desc}</p>
        
-       <label style="font-weight:700; display:block; margin-bottom:12px;">Color</label>
+       <label style="font-weight:700; display:block; margin-bottom:12px;">
+         Couleur: <span style="font-weight:400; color:var(--color-primary);">${currentVariant.name}</span>
+       </label>
        <div class="swatch-group">${swatches}</div>
        
        <div style="display:flex; gap:16px;">
-         <button class="btn btn-primary" style="flex:1; padding:18px;" onclick="addToCart(${p.id}); showToast('Added to bag! 🛍️')">Add to Bag</button>
+         <button class="btn btn-primary" style="flex:1; padding:18px;" onclick="addToCart(activeProductId, activeVariantIndex); showToast('Added to bag! 🛍️')">Add to Bag</button>
        </div>
     </div>
   `;
-
-    navigate('product');
 }
 
-function selectSwatch(el) {
-    el.parentNode.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
-    el.classList.add('selected');
+function selectSwatch(index) {
+    activeVariantIndex = index;
+    const p = products.find(x => x.id === activeProductId);
+    if (p) renderPDP(p);
 }
 
 // --- CART LOGIC ---
-function addToCart(id) {
-    const item = cart.find(x => x.id === id);
-    if (item) item.qty++;
-    else cart.push({ id, qty: 1 });
+function addToCart(id, variantIndex = 0) {
+    // Check if same product AND same variant exists
+    const existing = cart.find(x => x.id === id && x.variantIndex === variantIndex);
+
+    if (existing) {
+        existing.qty++;
+    } else {
+        cart.push({ id, qty: 1, variantIndex });
+    }
+
     saveCart();
     updateCart();
     renderCartList();
 }
 
-function removeFromCart(id) {
-    cart = cart.filter(x => x.id !== id);
+function removeFromCart(index) {
+    cart.splice(index, 1);
     saveCart();
     updateCart();
     renderCartList();
 }
 
-function updateQty(id, delta) {
-    const item = cart.find(x => x.id === id);
+function updateQty(index, delta) {
+    const item = cart[index];
     if (!item) return;
+
     item.qty += delta;
-    if (item.qty < 1) removeFromCart(id);
-    else {
+    if (item.qty < 1) {
+        removeFromCart(index);
+    } else {
         saveCart();
         updateCart();
         renderCartList();
@@ -243,7 +318,7 @@ function updateQty(id, delta) {
 }
 
 function saveCart() {
-    localStorage.setItem('cart_v22', JSON.stringify(cart));
+    localStorage.setItem('cart_v23', JSON.stringify(cart));
 }
 
 function updateCart() {
@@ -279,21 +354,29 @@ function renderCartList() {
     }
 
     let total = 0;
-    list.innerHTML = cart.map(item => {
+    list.innerHTML = cart.map((item, index) => {
         const p = products.find(x => x.id === item.id);
         if (!p) return '';
+
+        const variant = p.variants[item.variantIndex] || p.variants[0];
+        const displayImg = variant.img || p.img;
+
         total += p.price * item.qty;
         return `
       <div class="cart-item">
-        <img src="${p.img}" class="cart-img">
+        <div style="position:relative;">
+            <img src="${displayImg}" class="cart-img">
+            <div style="position:absolute; bottom:0; right:0; background:${variant.hex}; width:16px; height:16px; border-radius:50%; border:1px solid #fff;"></div>
+        </div>
         <div style="flex:1;">
           <h4 style="margin-bottom:4px;">${p.name}</h4>
+          <div style="font-size:0.8rem; color:var(--text-gray); margin-bottom:4px;">${variant.name}</div>
           <div style="color:var(--text-gray); font-size:0.9rem;">${p.price} DH</div>
         </div>
         <div class="qty-ctrl">
-           <span onclick="updateQty(${item.id}, -1)" style="cursor:pointer; padding:0 8px;">-</span>
+           <span onclick="updateQty(${index}, -1)" style="cursor:pointer; padding:0 8px;">-</span>
            <span>${item.qty}</span>
-           <span onclick="updateQty(${item.id}, 1)" style="cursor:pointer; padding:0 8px;">+</span>
+           <span onclick="updateQty(${index}, 1)" style="cursor:pointer; padding:0 8px;">+</span>
         </div>
       </div>
     `;
@@ -302,7 +385,7 @@ function renderCartList() {
     document.getElementById('drawerTotal').innerText = `${total} DH`;
 
     // also update checkout total if visible
-    if (cxTotal) cxTotal.innerText = `${total} DH`;
+    updateCheckoutTotal();
 
     renderCheckoutItems(); // Sync checkout view if open
 }
@@ -319,15 +402,18 @@ function renderCheckoutItems() {
     container.innerHTML = cart.map(item => {
         const p = products.find(prod => prod.id === item.id);
         if (!p) return '';
+        const variant = p.variants[item.variantIndex] || p.variants[0];
+        const displayImg = variant.img || p.img;
+
         return `
             <div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
                 <div style="position:relative;">
-                    <img src="${p.img}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; background:#f4f4f6;">
+                    <img src="${displayImg}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; background:#f4f4f6;">
                     <div style="position:absolute; -top:5px; -right:5px; background:var(--text-dark); color:white; width:20px; height:20px; border-radius:50%; font-size:0.75rem; display:flex; align-items:center; justify-content:center; font-weight:700;">${item.qty}</div>
                 </div>
                 <div style="flex:1;">
                    <div style="font-weight:600; font-size:0.95rem;">${p.name}</div>
-                   <div style="color:var(--text-gray); font-size:0.85rem;">${p.variants && p.variants[0] ? p.variants[0].name : ''}</div>
+                   <div style="color:var(--text-gray); font-size:0.85rem;">${variant.name}</div>
                 </div>
                 <div style="font-weight:700;">${p.price * item.qty} DH</div>
             </div>
@@ -406,35 +492,89 @@ function updateCheckoutTotal() {
     const shipping = selectedCity ? selectedCity.price : 0;
     const grandTotal = cartTotal + shipping;
 
-    const cxTotal = document.getElementById('cxTotal');
-    if (cxTotal) {
+    const cxTotalEl = document.getElementById('cxTotal');
+    if (cxTotalEl) {
         if (selectedCity) {
-            cxTotal.innerHTML = `${cartTotal} DH <span style="font-weight:400; font-size:0.8em;">+ ${shipping} DH (Livraison)</span> <br> = ${grandTotal} DH`;
+            cxTotalEl.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                    <span>${cartTotal} DH <span style="font-weight:400; font-size:0.7em; color:var(--text-gray);"> (Panier)</span></span>
+                    <span style="font-weight:400; font-size:0.8em; color:var(--color-primary);">+ ${shipping} DH (Livraison)</span>
+                    <span style="border-top:1px solid #ddd; margin-top:4px; padding-top:4px;">${grandTotal} DH</span>
+                </div>`;
         } else {
-            cxTotal.innerText = `${cartTotal} DH`;
+            cxTotalEl.innerText = `${cartTotal} DH`;
         }
     }
 }
 
 // --- CHECKOUT SUBMISSION ---
-function submitOrder(event) {
+async function submitOrder(event) {
     event.preventDefault();
-    const name = document.getElementById('cxName').value;
-    const cityVal = document.getElementById('cxCityValue').value;
 
-    if (!name || !cityVal) {
+    // Gather Data
+    const name = document.getElementById('cxName').value;
+    const phone = document.getElementById('cxPhone').value;
+    const cityVal = document.getElementById('cxCityValue').value;
+    const address = document.getElementById('cxAddress').value;
+
+    if (!name || !cityVal || !phone || !address) {
         if (!cityVal) showToast("Veuillez sélectionner une ville");
+        else showToast("Veuillez remplir tous les champs");
         return;
     }
 
-    showToast(`Commande reçue! Merci ${name.split(' ')[0]} ✨`);
-    // Clear cart
-    cart = [];
-    saveCart();
-    updateCart();
-    setTimeout(() => {
-        navigate('home');
-    }, 2000);
+    // Calculate Total & Items String
+    const cartTotal = cart.reduce((sum, item) => {
+        const p = products.find(prod => prod.id === item.id);
+        return sum + (p ? p.price * item.qty : 0);
+    }, 0);
+    const shipping = selectedCity ? selectedCity.price : 0;
+    const grandTotal = cartTotal + shipping;
+
+    const itemsString = cart.map(item => {
+        const p = products.find(prod => prod.id === item.id);
+        if (!p) return 'Unknown';
+        const variant = p.variants[item.variantIndex] || p.variants[0];
+        return `${p.name} [${variant.name}] (x${item.qty})`;
+    }).join(', ');
+
+    // Prepare Form Data
+    const formData = new FormData();
+    formData.append(GOOGLE_FORM_ENTRY_IDS.name, name);
+    formData.append(GOOGLE_FORM_ENTRY_IDS.phone, phone);
+    formData.append(GOOGLE_FORM_ENTRY_IDS.city, cityVal);
+    formData.append(GOOGLE_FORM_ENTRY_IDS.address, address);
+    formData.append(GOOGLE_FORM_ENTRY_IDS.items, itemsString);
+    formData.append(GOOGLE_FORM_ENTRY_IDS.total, `${grandTotal} DH`);
+    formData.append(GOOGLE_FORM_ENTRY_IDS.notes, '');
+
+    // UI Feedback
+    const btn = event.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerText;
+    btn.innerText = "Traitement...";
+    btn.disabled = true;
+
+    try {
+        await fetch(GOOGLE_FORM_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: formData
+        });
+
+        // Success Handling
+        showToast(`Commande reçue! Merci ${name.split(' ')[0]} ✨`);
+        cart = [];
+        saveCart();
+        updateCart();
+        navigate('thankyou');
+
+    } catch (error) {
+        console.error('Order submission failed:', error);
+        showToast("Erreur de connexion. Veuillez réessayer.");
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
 }
 
 // --- UTILS ---

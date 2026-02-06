@@ -76,11 +76,10 @@
       <h2 style="margin-bottom:24px; font-size:1.8rem; padding: 0 10px;">Parcourir</h2>
       <div class="cat-rail">
         <button class="cat-chip" onclick="filterShop('all'); navigate('shop');">✨ Tout</button>
-        <button class="cat-chip" onclick="filterShop('plushies'); navigate('shop');">🧸 Peluches</button>
-        <button class="cat-chip" onclick="filterShop('bags'); navigate('shop');">🎒 Sacs</button>
-        <button class="cat-chip" onclick="filterShop('decor'); navigate('shop');">🪴 Déco</button>
-        <button class="cat-chip" onclick="filterShop('sale'); navigate('shop');" style="color:var(--color-sale);">🔥
-          Soldes</button>
+        <button class="cat-chip" onclick="filterShop('hellokitty'); navigate('shop');">🎀 Hello Kitty</button>
+        <button class="cat-chip" onclick="filterShop('accessoires'); navigate('shop');">👜 Accessoires</button>
+        <button class="cat-chip" onclick="filterShop('deco'); navigate('shop');">🪴 Déco</button>
+        <button class="cat-chip" onclick="filterShop('autres'); navigate('shop');">✨ Autres</button>
       </div>
 
       <h2 style="margin: 60px 0 32px; font-size:1.8rem; padding: 0 10px;">Tendance</h2>
@@ -96,10 +95,10 @@
 
       <div class="cat-rail" style="margin-bottom:40px;">
         <button class="cat-chip active" id="filt-all" onclick="filterShop('all')">Tout</button>
-        <button class="cat-chip" id="filt-plushies" onclick="filterShop('plushies')">Peluches</button>
-        <button class="cat-chip" id="filt-bags" onclick="filterShop('bags')">Sacs</button>
-        <button class="cat-chip" id="filt-decor" onclick="filterShop('decor')">Déco</button>
-        <button class="cat-chip" id="filt-sale" onclick="filterShop('sale')">Soldes</button>
+        <button class="cat-chip" id="filt-hellokitty" onclick="filterShop('hellokitty')">Hello Kitty</button>
+        <button class="cat-chip" id="filt-accessoires" onclick="filterShop('accessoires')">Accessoires</button>
+        <button class="cat-chip" id="filt-deco" onclick="filterShop('deco')">Déco</button>
+        <button class="cat-chip" id="filt-autres" onclick="filterShop('autres')">Autres</button>
       </div>
 
       <div class="grid-wrap" id="shopGrid"></div>
@@ -120,10 +119,14 @@
         <span class="hand" style="font-size:3rem; color:var(--color-primary);">Notre Histoire</span>
         <h1 style="font-size:3.5rem; line-height:1.1; margin:24px 0 48px;">Répandre la Joie,<br>Une boîte à la fois.
         </h1>
+        <p style="font-size:1.25rem; color:var(--text-gray); line-height:1.8; margin-bottom:24px;">
+          Il était une fois, une fille merveilleuse qui croyait que les petites choses pouvaient créer de grands
+          sourires. Avec un regard doux pour la beauté et un cœur rempli d’amour, elle a créé Cutesy Finds pour
+          transformer les moments du quotidien en quelque chose d’un peu plus spécial. 🎀
+        </p>
         <p style="font-size:1.25rem; color:var(--text-gray); line-height:1.8;">
-          Lancée en 2024, Cutesy Finds est née d'une idée simple : le monde a besoin de plus de douceur. Nous
-          sélectionnons
-          les articles les plus moelleux, rêveurs et esthétiques pour faire de votre quotidien une scène de film.
+          Chaque article ici est soigneusement sélectionné ou fabriqué à la main avec un seul objectif : devenir la plus
+          belle partie de votre journée.
         </p>
       </div>
     </div>
@@ -173,6 +176,18 @@
           <button type="submit" class="btn btn-primary" style="width:100%; font-size:1.1rem; padding:20px;">Confirmer la
             Commande</button>
         </form>
+      </div>
+    </div>
+
+    <!-- === THANK YOU VIEW === -->
+    <div id="view-thankyou" class="view-section container" style="text-align:center; padding-top:100px;">
+      <div class="thank-you-box" style="max-width:500px; margin:0 auto;">
+        <span class="material-symbols-rounded"
+          style="font-size:80px; color:var(--color-success); margin-bottom:24px;">check_circle</span>
+        <h1 style="font-size:2.5rem; margin-bottom:16px;">Merci !</h1>
+        <p style="font-size:1.2rem; color:var(--text-gray); margin-bottom:32px;">Votre commande a été reçue avec succès.
+          Nous préparerons votre colis avec amour ! 💖</p>
+        <button class="btn btn-primary" onclick="navigate('home')">Continuer vos achats</button>
       </div>
     </div>
 

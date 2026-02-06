@@ -119,6 +119,7 @@ textarea,
 select {
     font-family: inherit;
     -webkit-appearance: none;
+    appearance: none;
 }
 
 .container {
@@ -625,7 +626,7 @@ header {
 }
 
 .card {
-    group: 1;
+    /* group: 1; - removed invalid property */
     background: transparent;
     cursor: pointer;
     position: relative;
@@ -1067,4 +1068,16 @@ header {
     padding: 24px;
     border-radius: 24px;
     margin-bottom: 32px;
+}
+
+@media (max-width: 480px) {
+    .summary-box div {
+        align-items: flex-start !important;
+        /* Force column alignment on very small screens if needed, though flex-end was set in JS */
+        flex-direction: column;
+    }
+
+    .summary-box div>span:first-child {
+        margin-bottom: 8px;
+    }
 }
