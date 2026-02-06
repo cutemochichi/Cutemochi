@@ -38,6 +38,9 @@
     --radius-lg: 32px;
     --radius-pill: 9999px;
 
+    /* Shadows for Cards */
+    --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.08);
+
     /* Layout */
     --header-h: 70px;
     --container-px: 1440px;
@@ -1020,6 +1023,7 @@ header {
     z-index: 100;
     display: none;
     box-shadow: var(--shadow-md);
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .select-dropdown.open {

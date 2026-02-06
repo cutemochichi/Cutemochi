@@ -71,11 +71,17 @@ const heroSlides = [
         image: "Background.png",
         tag: "New Drop! 🌸",
         title: "Making your space <br>soft & dreamy.",
+        buttons: [
+            { text: "Shop Collection", action: "navigate('shop')" }
+        ]
     },
     {
         image: "Background.png",
         tag: "So Fluffy! 🧸",
         title: "Huggable friends <br>for everyone.",
+        buttons: [
+            { text: "Shop Plushies", action: "filterShop('plushies'); navigate('shop');" }
+        ]
     }
 ];
 
@@ -437,6 +443,19 @@ function populateCities() {
         div.onclick = () => selectCity(c);
         dropdown.appendChild(div);
     });
+
+    // Event Listener for Trigger (Robust Mobile Handling)
+    const trigger = document.getElementById('cityTrigger');
+    if (trigger) {
+        // Remove old listeners to be safe (if re-run)
+        const newTrigger = trigger.cloneNode(true);
+        trigger.parentNode.replaceChild(newTrigger, trigger);
+
+        newTrigger.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevents document click from immediately closing it
+            toggleCityDropdown();
+        });
+    }
 
     // Outside click closer (only add once)
     if (!window.hasClickCloseListener) {
