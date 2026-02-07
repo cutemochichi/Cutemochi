@@ -138,6 +138,10 @@ function navigate(viewId, push = true) {
     if (push) historyStack.push(viewId);
 
     // Hide all views
+    if (viewId === 'checkout' && cart.length === 0) {
+        showToast("Votre panier est vide ! 🛒");
+        return;
+    }
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
     // Show target
     const target = document.getElementById(`view-${viewId}`);
@@ -356,7 +360,22 @@ function renderCartList() {
       <p>Your bag is empty.</p>
     </div>`;
         document.getElementById('drawerTotal').innerText = '0 DH';
+        const btn = document.getElementById('checkoutBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+            btn.innerText = "Panier Vide";
+        }
         return;
+    }
+
+    const btn = document.getElementById('checkoutBtn');
+    if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.innerText = "Commander";
     }
 
     let total = 0;
