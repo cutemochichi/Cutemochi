@@ -59,7 +59,7 @@ const products = [
         desc: "hello kitty pijama For The best cozy nights.",
         variants: [
             { name: "Rose", hex: "#ffffffff", img: "Pantofa_Pink.jpg" },
-            { name: "Maron", hex: "#e47d4dad", img: "Pantofa_Brown.jpg" },
+            { name: "Maron", hex: "#e47d4d5d", img: "Pantofa_Brown.jpg" },
         ]
     },
     { id: 4, name: "Sac Fluffy", price: 350, oldPrice: 400, cat: "accessoires", badge: "New", img: "bag.jpg", desc: "Sac fourre-tout esthétique avec texture fausse fourrure.", variants: [{ name: "Blanc", hex: "#fff", img: "bag.jpg" }] },
@@ -68,19 +68,19 @@ const products = [
 // --- CONFIG: HERO SLIDES (Editable) ---
 const heroSlides = [
     {
-        image: "Background.png",
-        tag: "New Drop! 🌸",
-        title: "Making your space <br>soft & dreamy.",
+        image: "Background.png", // Using generic bg as requested
+        tag: "New Arrival 🔥",
+        title: "Trending <br>Chinese Jackets",
         buttons: [
-            { text: "Shop Collection", action: "navigate('shop')" }
+            { text: "Shop Collection", action: "filterShop('autres'); navigate('shop');" }
         ]
     },
     {
         image: "Background.png",
-        tag: "So Fluffy! 🧸",
-        title: "Huggable friends <br>for everyone.",
+        tag: "Soft & Cute 🎀",
+        title: "Cozy Hello Kitty <br>Collection",
         buttons: [
-            { text: "Shop Plushies", action: "filterShop('plushies'); navigate('shop');" }
+            { text: "Shop Hello Kitty", action: "filterShop('hellokitty'); navigate('shop');" }
         ]
     }
 ];

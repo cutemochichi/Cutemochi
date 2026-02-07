@@ -163,7 +163,7 @@ select {
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
-    background: radial-gradient(circle at top left, #fff5f7, #ffffff);
+    background: radial-gradient(circle at top left, #ffd0e0, #ffffff);
 }
 
 .noise-overlay {
@@ -1023,7 +1023,8 @@ header {
     z-index: 100;
     display: none;
     box-shadow: var(--shadow-md);
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
 }
 
 .select-dropdown.open {
