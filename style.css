@@ -1086,3 +1086,262 @@ header {
         margin-bottom: 8px;
     }
 }
+/* =========================================
+   9. FOOTER
+   ========================================= */
+.footer-wrapper {
+    background: white;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 80px 0 30px;
+    margin-top: 80px;
+    position: relative;
+    z-index: 10;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 60px;
+    margin-bottom: 60px;
+}
+
+.footer-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.footer-brand {
+    font-size: 1.8rem;
+    margin-bottom: 24px;
+    padding-left: 0; /* Reset nav brand check if needed */
+}
+
+.footer-story {
+    font-size: 1rem;
+    color: var(--text-gray);
+    line-height: 1.8;
+    margin-bottom: 24px;
+    max-width: 380px;
+}
+
+.footer-link-highlight {
+    font-weight: 700;
+    color: var(--color-primary);
+    position: relative;
+    display: inline-block;
+    transition: 0.2s;
+}
+
+.footer-link-highlight:hover {
+    transform: translateX(4px);
+    color: var(--color-sale); /* Using existing vibrant red/pink */
+}
+
+.footer-heading {
+    font-size: 1.2rem;
+    margin-bottom: 24px;
+    color: var(--text-dark);
+}
+
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer-link {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.footer-link:hover {
+    color: var(--text-dark);
+    transform: translateX(2px);
+}
+
+.social-links {
+    display: flex;
+    gap: 16px;
+}
+
+.social-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #f4f4f6;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s var(--bounce);
+}
+
+.social-btn:hover {
+    transform: translateY(-4px);
+    color: white;
+}
+
+.social-btn.instagram:hover {
+    background: #E1306C;
+}
+
+.social-btn.tiktok:hover {
+    background: black;
+}
+
+.social-btn.whatsapp:hover {
+    background: #25D366;
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding-top: 30px;
+    text-align: center;
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+@media (max-width: 900px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+    }
+
+    .footer-col {
+        align-items: center;
+    }
+
+    .footer-brand {
+        justify-content: center;
+    }
+}
+
+/* =========================================
+   10. UNIQUE FEATURES SECTION
+   ========================================= */
+.unique-section {
+    padding: 80px 0;
+    background: white;
+    margin-top: 60px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+}
+
+.feature-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px;
+    background: var(--bg-surface);
+    border-radius: 24px;
+    transition: 0.3s var(--bounce);
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-md);
+    background: white;
+}
+
+.feature-icon-box {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: #e0f2f1; /* default teal-ish */
+    color: #009688;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 32px;
+    transition: 0.4s var(--bounce);
+}
+
+.feature-card:hover .feature-icon-box {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.feature-icon-box span {
+    font-size: 36px;
+}
+
+.feature-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+    font-family: 'Outfit', sans-serif; /* Explicitly use outfit */
+}
+
+.feature-card p {
+    font-size: 1rem;
+    color: var(--text-gray);
+    line-height: 1.6;
+}
+
+@media (max-width: 1024px) {
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+}
+
+@media (max-width: 600px) {
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .unique-section {
+        padding: 60px 0;
+    }
+}
+/* Refined Boxy Style for Features */
+.feature-card {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    /* Boxy border */
+    border-radius: 16px;
+    /* Reduced radius */
+    padding: 20px;
+    /* Reduced padding */
+    box-shadow: none;
+    /* Clean start */
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-color: transparent;
+}
+
+.feature-icon-box {
+    width: 60px;
+    /* Smaller icon box */
+    height: 60px;
+    font-size: 24px;
+    margin-bottom: 16px;
+}
+
+.feature-icon-box span {
+    font-size: 30px;
+    /* Smaller icon */
+}
+
+.feature-card h3 {
+    font-size: 1.1rem;
+    /* Smaller title */
+    margin-bottom: 8px;
+}
+
+.feature-card p {
+    font-size: 0.9rem;
+    /* Smaller text */
+    line-height: 1.5;
+}

@@ -412,16 +412,16 @@ function renderCheckoutItems() {
         const displayImg = variant.img || p.img;
 
         return `
-            <div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
-                <div style="position:relative;">
-                    <img src="${displayImg}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; background:#f4f4f6;">
-                    <div style="position:absolute; -top:5px; -right:5px; background:var(--text-dark); color:white; width:20px; height:20px; border-radius:50%; font-size:0.75rem; display:flex; align-items:center; justify-content:center; font-weight:700;">${item.qty}</div>
+            <div style="display:flex; gap:16px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px dashed #eee; align-items:center;">
+                <div style="position:relative; flex-shrink:0;">
+                    <img src="${displayImg}" style="width:60px; height:60px; border-radius:12px; object-fit:cover; background:#f4f4f6;">
+                    <div style="position:absolute; -top:6px; -right:6px; background:var(--text-dark); color:white; width:22px; height:22px; border-radius:50%; font-size:0.8rem; display:flex; align-items:center; justify-content:center; border:2px solid white; font-weight:700;">${item.qty}</div>
                 </div>
                 <div style="flex:1;">
-                   <div style="font-weight:600; font-size:0.95rem;">${p.name}</div>
-                   <div style="color:var(--text-gray); font-size:0.85rem;">${variant.name}</div>
+                   <div style="font-weight:700; font-size:1rem; margin-bottom:4px;">${p.name}</div>
+                   <div style="color:var(--text-gray); font-size:0.9rem;">${variant.name}</div>
                 </div>
-                <div style="font-weight:700;">${p.price * item.qty} DH</div>
+                <div style="font-weight:700; font-size:1.05rem;">${p.price * item.qty} DH</div>
             </div>
         `;
     }).join('');
