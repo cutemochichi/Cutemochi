@@ -409,6 +409,11 @@ header {
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    will-change: transform;
+    /* Optimize hover scale */
+    backface-visibility: hidden;
+    /* Prevent blur/jitter */
+    touch-action: manipulation;
 }
 
 .btn:hover {
@@ -626,6 +631,9 @@ header {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 32px 24px;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 1000px;
+    /* Approximate height of content */
 }
 
 .card {
@@ -633,6 +641,7 @@ header {
     background: transparent;
     cursor: pointer;
     position: relative;
+    touch-action: manipulation;
 }
 
 .card:hover .card-img-box {
@@ -648,6 +657,7 @@ header {
     margin-bottom: 16px;
     background: #f0f0f2;
     transition: all 0.4s var(--smooth);
+    will-change: transform, box-shadow;
 }
 
 .card-img {
@@ -655,6 +665,8 @@ header {
     height: 100%;
     transition: 0.6s var(--smooth);
     object-fit: cover;
+    will-change: transform;
+    backface-visibility: hidden;
 }
 
 .card:hover .card-img {

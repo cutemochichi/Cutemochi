@@ -38,11 +38,10 @@ const products = [
         id: 2,
         name: "Pantalon Hello Kitty",
         price: 150,
-        oldPrice: 180,
         cat: "hellokitty",
         badge: "Best",
         img: "pantalon-hello-kitty-1.jpeg", // Default
-        desc: "hello kitty pijama For The best cozy nights.",
+        desc: "hello kitty pijama.",
         variants: [
             { name: "Blanc", hex: "#ffffffff", img: "pantalon-hello-kitty-1.jpeg", stock: { S: 1, M: 0, L: 0, XL: 0 } },
             { name: "Rose", hex: "#ff4181ff", img: "pantalon-hello-kitty-2.jpeg", stock: { S: 0, M: 0, L: 0, XL: 0 } },
@@ -57,7 +56,7 @@ const products = [
         cat: "hellokitty",
         badge: "Best",
         img: "hello-kitty-uggs-1.jpeg", // Default
-        desc: "hello kitty pijama For The best cozy nights.",
+        desc: "hello kitty UGGs.",
         variants: [
             { name: "Rose", hex: "#ffffffff", img: "hello-kitty-uggs-1.jpeg", stock: 1 },
             { name: "Maron", hex: "#e47d4d5d", img: "hello-kitty-uggs-2.jpeg", stock: 1 },
@@ -78,11 +77,11 @@ const products = [
     {
         id: 5,
         name: "Cute Bandana",
-        price: 45,
+        price: 40,
         cat: "accessoires",
         badge: "Best",
         img: "cute-bandana-1.jpeg", // Default
-        desc: "Cute Bandana For The best cozy nights.",
+        desc: "Cute Bandana.",
         variants: [
             { name: "1", hex: "#bf1b32", img: "cute-bandana-1.jpeg", stock: 1 },
             { name: "2", hex: "#e2cdb2", img: "cute-bandana-2.jpeg", stock: 1 },
@@ -233,6 +232,9 @@ let activeSize = null;
 // let inventory = {}; // Removed
 let pdpInterval = null; // Store interval ID
 
+// --- DOM CACHE ---
+const elements = {}; // Cache for DOM elements
+
 // --- INVENTORY MANAGEMENT ---
 // Stock is managed directly in the products array (static).
 // No localStorage persistence for inventory.
@@ -275,6 +277,21 @@ function reduceStock() {
 
 // --- INIT ---
 window.onload = () => {
+    // Cache DOM Elements
+    elements.heroSlider = document.getElementById('heroSlider');
+    elements.homeGrid = document.getElementById('homeGrid');
+    elements.shopGrid = document.getElementById('shopGrid');
+    elements.cartBadge = document.getElementById('cartBadge');
+    elements.mobBadge = document.getElementById('mobBadge');
+    elements.cartList = document.getElementById('cartList');
+    elements.drawerTotal = document.getElementById('drawerTotal');
+    elements.checkoutBtn = document.getElementById('checkoutBtn');
+    elements.pdpContainer = document.getElementById('pdpContainer');
+    elements.scrim = document.getElementById('scrim');
+    elements.cartDrawer = document.getElementById('cartDrawer');
+    elements.toast = document.getElementById('toast');
+    elements.toastMsg = document.getElementById('toastMsg');
+
     // Clear old inventory to avoid confusion if needed
     localStorage.removeItem('inventory_v1');
 
@@ -298,7 +315,7 @@ window.onload = () => {
 
 // --- SLIDER LOGIC ---
 function renderHero() {
-    const container = document.getElementById('heroSlider');
+    const container = elements.heroSlider;
     if (!container) return;
 
     container.innerHTML = heroSlides.map((slide, i) => `
@@ -337,6 +354,7 @@ function navigate(viewId, push = true) {
 
     const target = document.getElementById(`view-${viewId}`);
     if (target) {
+        // Optimize: verify classList toggle efficiency
         target.classList.add('active');
         window.scrollTo(0, 0);
     }
@@ -384,7 +402,7 @@ function createCard(p) {
     <div class="card ${p.inStock === false ? 'out-of-stock' : ''}" onclick="openProduct(${p.id})">
       <div class="card-img-box">
         ${badgeHtml}
-        <img src="${p.img}" class="card-img" alt="${p.name}" loading="lazy">
+        <img src="${p.img}" class="card-img" alt="${p.name}" loading="lazy" decoding="async" width="300" height="330">
       </div>
       <h3>${p.name}</h3>
       <p>${priceDisplay}</p>
@@ -393,17 +411,27 @@ function createCard(p) {
 }
 
 function renderProducts() {
-    const container = document.getElementById('homeGrid');
+    const container = elements.homeGrid;
     if (!container) return;
 
     // Sort products: in-stock first
     const sorted = sortProducts(products);
+    const fragment = document.createDocumentFragment();
+
+    // Create temp container to parse HTML string (simplest migration without rewriting creatingCard to return nodes)
+    // Or just set innerHTML which is fast enough for small lists, but we can stick to innerHTML for simplicity 
+    // if we aren't creating nodes. 
+    // Actually, innerHTML on container is fine, but for "shop" with many items, batching string concat is better than loop appends.
+    // The current map(...).join('') IS efficient. 
+    // To truly optimize, we'd avoid innerHTML re-flow, but with map().join('') it's one reflow.
+    // So distinct DocumentFragment isn't strictly necessary unless we create DOM nodes. 
+    // I will keep map().join('') but ensure we use cached container.
 
     container.innerHTML = sorted.slice(0, 4).map(createCard).join('');
 }
 
 function renderShop() {
-    const container = document.getElementById('shopGrid');
+    const container = elements.shopGrid;
     if (!container) return;
 
     let filtered = products;
@@ -417,6 +445,7 @@ function renderShop() {
     // Sort: in-stock first, then out-of-stock
     filtered = sortProducts(filtered);
 
+    // Efficient one-time update
     container.innerHTML = filtered.map(createCard).join('');
 }
 
@@ -508,7 +537,8 @@ function stopPDPAutoSlide() {
 }
 
 function renderPDP(p) {
-    const container = document.getElementById('pdpContainer');
+    const container = elements.pdpContainer;
+    if (!container) return; // Guard clause
     const currentVariant = (p.variants && p.variants.length > 0 && activeVariantIndex !== null)
         ? p.variants[activeVariantIndex]
         : { name: "Sélectionner", hex: "transparent", img: p.img };
@@ -600,7 +630,8 @@ function renderPDP(p) {
             variantStock = getStock(p.id, activeVariantIndex);
         } else {
             // If no variant selected yet, check if *any* variant has stock
-            variantStock = 1; // Assume locally available so we can show "Select Option" button
+            // Only assume available if product itself is inStock
+            variantStock = (p.inStock !== false) ? 1 : 0;
         }
     }
 
@@ -609,7 +640,9 @@ function renderPDP(p) {
     // Check if variant selection is required
     const variantRequired = p.requireVariantSelection && activeVariantIndex === null;
 
-    if (variantStock <= 0 && !variantRequired) {
+    if (p.inStock === false) {
+        btnHtml = `<button class="btn btn-primary" disabled style="flex:1; padding:18px; opacity:0.6; cursor:not-allowed; background:var(--text-gray);">Rupture de Stock</button>`;
+    } else if (variantStock <= 0 && !variantRequired) {
         // Only show out of stock if we have a valid selection that is out of stock
         // If nothing selected, we don't know it's out of stock yet
         btnHtml = `<button class="btn btn-primary" disabled style="flex:1; padding:18px; opacity:0.6; cursor:not-allowed; background:var(--text-gray);">Rupture de Stock</button>`;
@@ -617,16 +650,16 @@ function renderPDP(p) {
         const sizeRequired = p.sizes && !activeSize;
 
         if (variantRequired) {
-            btnHtml = `<button class="btn btn-primary" style="flex:1; padding:18px; opacity:0.8;" onclick="showToast('Veuillez choisir une option ${p.variantStyle === 'button' ? 'numérotée' : 'de couleur'} 👇')">Add to Bag</button>`;
+            btnHtml = `<button class="btn btn-primary" style="flex:1; padding:18px; opacity:0.8;" onclick="showToast('Veuillez choisir une option ${p.variantStyle === 'button' ? 'numérotée' : 'de couleur'} 👇')">Ajouter au panier</button>`;
         } else if (sizeRequired) {
-            btnHtml = `<button class="btn btn-primary" style="flex:1; padding:18px; opacity:0.8;" onclick="showToast('Veuillez choisir une taille 📏')">Add to Bag</button>`;
+            btnHtml = `<button class="btn btn-primary" style="flex:1; padding:18px; opacity:0.8;" onclick="showToast('Veuillez choisir une taille 📏')">Ajouter au panier</button>`;
         } else {
             // Check specific variant stock again to be sure
             const finalStock = activeVariantIndex !== null ? getStock(p.id, activeVariantIndex) : 1;
             if (finalStock <= 0) {
                 btnHtml = `<button class="btn btn-primary" disabled style="flex:1; padding:18px; opacity:0.6; cursor:not-allowed; background:var(--text-gray);">Rupture de Stock</button>`;
             } else {
-                btnHtml = `<button class="btn btn-primary" style="flex:1; padding:18px;" onclick="addToCart(activeProductId, activeVariantIndex, activeSize); showToast('Added to bag! 🛍️')">Add to Bag</button>`;
+                btnHtml = `<button class="btn btn-primary" style="flex:1; padding:18px;" onclick="addToCart(activeProductId, activeVariantIndex, activeSize); showToast('Ajouté au panier ! 🛍️')">Ajouter au panier</button>`;
             }
         }
     }
@@ -735,34 +768,34 @@ function saveCart() {
 
 function updateCart() {
     const count = cart.reduce((sum, i) => sum + i.qty, 0);
-    document.getElementById('cartBadge').innerText = count;
-    document.getElementById('mobBadge').innerText = count;
+    if (elements.cartBadge) elements.cartBadge.innerText = count;
+    if (elements.mobBadge) elements.mobBadge.innerText = count;
 
-    document.getElementById('cartBadge').classList.toggle('visible', count > 0);
-    document.getElementById('mobBadge').classList.toggle('visible', count > 0);
+    if (elements.cartBadge) elements.cartBadge.classList.toggle('visible', count > 0);
+    if (elements.mobBadge) elements.mobBadge.classList.toggle('visible', count > 0);
 }
 
 // --- DRAWER ---
 function openCart() {
-    document.getElementById('scrim').classList.add('open');
-    document.getElementById('cartDrawer').classList.add('open');
+    if (elements.scrim) elements.scrim.classList.add('open');
+    if (elements.cartDrawer) elements.cartDrawer.classList.add('open');
     renderCartList();
 }
 
 function closeDrawers() {
-    document.getElementById('scrim').classList.remove('open');
+    if (elements.scrim) elements.scrim.classList.remove('open');
     document.querySelectorAll('.drawer').forEach(d => d.classList.remove('open'));
 }
 
 function renderCartList() {
-    const list = document.getElementById('cartList');
+    const list = elements.cartList;
     if (cart.length === 0) {
         list.innerHTML = `<div style="text-align:center; margin-top:60px; color:#ccc;">
       <span class="material-symbols-rounded" style="font-size:64px; margin-bottom:16px;">shopping_bag</span>
       <p>Your bag is empty.</p>
     </div>`;
-        document.getElementById('drawerTotal').innerText = '0 DH';
-        const btn = document.getElementById('checkoutBtn');
+        if (elements.drawerTotal) elements.drawerTotal.innerText = '0 DH';
+        const btn = elements.checkoutBtn;
         if (btn) {
             btn.disabled = true;
             btn.style.opacity = '0.5';
@@ -772,7 +805,7 @@ function renderCartList() {
         return;
     }
 
-    const btn = document.getElementById('checkoutBtn');
+    const btn = elements.checkoutBtn;
     if (btn) {
         btn.disabled = false;
         btn.style.opacity = '1';
@@ -810,7 +843,7 @@ function renderCartList() {
     `;
     }).join('');
 
-    document.getElementById('drawerTotal').innerText = `${total} DH`;
+    if (elements.drawerTotal) elements.drawerTotal.innerText = `${total} DH`;
     updateCheckoutTotal();
     renderCheckoutItems();
 }
@@ -1012,8 +1045,10 @@ async function submitOrder(event) {
 
 // --- UTILS ---
 function showToast(msg) {
-    const t = document.getElementById('toast');
-    const tMsg = document.getElementById('toastMsg');
+    const t = elements.toast;
+    const tMsg = elements.toastMsg;
+    if (!t || !tMsg) return;
+
     tMsg.innerText = msg;
     t.classList.add('active');
     setTimeout(() => t.classList.remove('active'), 3000);
