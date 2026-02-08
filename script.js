@@ -19,56 +19,187 @@ const GOOGLE_FORM_URL = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_ID}/for
 const products = [
     {
         id: 1,
-        name: "Chinese Jacket",
-        price: 200,
-        oldPrice: 250,
+        name: "Adidas Chinese New Year jacket",
+        price: 250,
         cat: "autres",
+        inStock: true,
         badge: "Best",
-        img: "ChineseJacket_Purple.jpg", // Default
+        img: "adidas-chinese-new-year-jacket-purple.jpg", // Default
         desc: "Chinese Jacket Become like a real one.",
         variants: [
-            { name: "Mauve", hex: "#d0a2be", img: "ChineseJacket_Purple.jpg" },
-            { name: "Rose", hex: "#fdcddd", img: "ChineseJacket_Pink.jpg" },
-            { name: "Bleu", hex: "#012d6a", img: "ChineseJacket_Blue.jpg" },
-            { name: "Orange", hex: "#c44123", img: "ChineseJacket_Orange.jpg" },
-            { name: "Foncé", hex: "#d1738d", img: "ChineseJacket_Darkpink.jpg" },
+            { name: "Mauve", hex: "#d0a2be", img: "adidas-chinese-new-year-jacket-purple.jpg", stock: 1 },
+            { name: "Rose", hex: "#fdcddd", img: "adidas-chinese-new-year-jacket-pink.jpg", stock: 1 },
+            { name: "Bleu", hex: "#012d6a", img: "adidas-chinese-new-year-jacket-blue.jpg", stock: 0 },
+            { name: "Orange", hex: "#c44123", img: "adidas-chinese-new-year-jacket-orange.jpg", stock: 1 },
+            { name: "Darkpink", hex: "#d1738d", img: "adidas-chinese-new-year-jacket-darkpink.jpg", stock: 1 },
         ]
     },
     {
         id: 2,
-        name: "hello kitty pijama",
+        name: "Pantalon Hello Kitty",
         price: 150,
         oldPrice: 180,
         cat: "hellokitty",
         badge: "Best",
-        img: "hellokittypijama_White.jpg", // Default
+        img: "pantalon-hello-kitty-1.jpeg", // Default
         desc: "hello kitty pijama For The best cozy nights.",
         variants: [
-            { name: "Blanc", hex: "#ffffffff", img: "hellokittypijama_White.jpg" },
-            { name: "Rose", hex: "#ff4181ff", img: "hellokittypijama_Pink.jpg" },
-            { name: "Noir", hex: "#000000ff", img: "hellokittypijama_Black.jpg" },
-        ]
+            { name: "Blanc", hex: "#ffffffff", img: "pantalon-hello-kitty-1.jpeg", stock: { S: 1, M: 0, L: 0, XL: 0 } },
+            { name: "Rose", hex: "#ff4181ff", img: "pantalon-hello-kitty-2.jpeg", stock: { S: 0, M: 0, L: 0, XL: 0 } },
+            { name: "Noir", hex: "#000000ff", img: "pantalon-hello-kitty-3.jpeg", stock: { S: 0, M: 0, L: 0, XL: 0 } },
+        ],
+        sizes: ["S", "M", "L", "XL"]
     },
     {
         id: 3,
-        name: "Pantoufle",
-        price: 120,
+        name: "Hello Kitty UGGs",
+        price: 260,
         cat: "hellokitty",
         badge: "Best",
-        img: "Pantofa_Pink.jpg", // Default
+        img: "hello-kitty-uggs-1.jpeg", // Default
         desc: "hello kitty pijama For The best cozy nights.",
         variants: [
-            { name: "Rose", hex: "#ffffffff", img: "Pantofa_Pink.jpg" },
-            { name: "Maron", hex: "#e47d4d5d", img: "Pantofa_Brown.jpg" },
+            { name: "Rose", hex: "#ffffffff", img: "hello-kitty-uggs-1.jpeg", stock: 1 },
+            { name: "Maron", hex: "#e47d4d5d", img: "hello-kitty-uggs-2.jpeg", stock: 1 },
+            { name: "Noir", hex: "#000000ff", img: "hello-kitty-uggs-3.jpeg", stock: 1 },
         ]
     },
-    { id: 4, name: "Sac Fluffy", price: 350, oldPrice: 400, cat: "accessoires", badge: "New", img: "bag.jpg", desc: "Sac fourre-tout esthétique avec texture fausse fourrure.", variants: [{ name: "Blanc", hex: "#fff", img: "bag.jpg" }] },
+    {
+        id: 4,
+        name: "Pearl Necklace",
+        price: 160,
+        cat: "accessoires",
+        inStock: false,
+        images: ["pearl-necklace-1.jpeg", "pearl-necklace-2.jpeg", "pearl-necklace-3.jpeg", "pearl-necklace-4.jpeg", "pearl-necklace-5.jpeg"],
+        badge: "Best",
+        img: "pearl-necklace-1.jpeg", // Default
+        desc: "Pearl Necklace.",
+    },
+    {
+        id: 5,
+        name: "Cute Bandana",
+        price: 45,
+        cat: "accessoires",
+        badge: "Best",
+        img: "cute-bandana-1.jpeg", // Default
+        desc: "Cute Bandana For The best cozy nights.",
+        variants: [
+            { name: "1", hex: "#bf1b32", img: "cute-bandana-1.jpeg", stock: 1 },
+            { name: "2", hex: "#e2cdb2", img: "cute-bandana-2.jpeg", stock: 1 },
+            { name: "3", hex: "#e1b4b4", img: "cute-bandana-3.jpeg", stock: 1 },
+            { name: "4", hex: "#9c9443", img: "cute-bandana-4.jpeg", stock: 1 },
+            { name: "5", hex: "#587853", img: "cute-bandana-5.jpeg", stock: 1 },
+            { name: "6", hex: "#b8bfda", img: "cute-bandana-6.jpeg", stock: 1 },
+        ]
+    },
+    {
+        id: 6,
+        name: "Mikasa Scarf",
+        price: 120,
+        cat: "accessoires",
+        inStock: true,
+        images: ["mikasa-scarf-1.jpeg", "mikasa-scarf-2.jpeg"],
+        badge: "Best",
+        img: "mikasa-scarf-1.jpeg", // Default
+        desc: "Mikasa Scarf.",
+    },
+    {
+        id: 7,
+        name: "Lampe Tulip",
+        cat: "accessoires",
+        inStock: false,
+        images: ["lampe-tulip-1.jpeg", "lampe-tulip-2.jpeg"],
+        badge: "Best",
+        img: "lampe-tulip-1.jpeg", // Default
+        desc: "Lampe Tulip.",
+    },
+    {
+        id: 8,
+        name: "Ceinture Vintage",
+        cat: "accessoires",
+        inStock: false,
+        badge: "Best",
+        img: "ceinture-vintage-1.jpeg", // Default
+        desc: "Ceinture Vintage.",
+        variants: [
+            { name: "1", img: "ceinture-vintage-1.jpeg", stock: 1 },
+            { name: "2", img: "ceinture-vintage-2.jpeg", stock: 1 },
+        ],
+        variantStyle: 'button', // Use buttons for variants
+        requireVariantSelection: true // Force selection
+    },
+    {
+        id: 9,
+        name: "Lunettes MiuMiu anti-reflets",
+        price: 90,
+        cat: "accessoires",
+        inStock: false,
+        images: ["lunettes-miumiu-1.jpeg", "lunettes-miumiu-2.jpeg", "lunettes-miumiu-3.jpeg", "lunettes-miumiu-4.jpeg", "lunettes-miumiu-5.jpeg"],
+        badge: "Best",
+        img: "lunettes-miumiu-1.jpeg", // Default
+        desc: "Lunettes MiuMiu anti-reflets For The best cozy nights.",
+    },
+    {
+        id: 10,
+        name: "Tenue Maroc personnalisé",
+        price: 360,
+        cat: "accessoires",
+        inStock: false,
+        images: ["tenue-maroc-personnalisee-1.jpeg", "tenue-maroc-personnalisee-2.jpeg", "tenue-maroc-personnalisee-3.jpeg", "tenue-maroc-personnalisee-4.jpeg", "tenue-maroc-personnalisee-5.jpeg"],
+        badge: "Best",
+        img: "tenue-maroc-personnalisee-1.jpeg",// Default
+        desc: "Tenue Maroc personnalisé.",
+    },
+    {
+        id: 11,
+        name: "Collier Hello Kitty en acier inoxydable",
+        price: 40,
+        cat: "hellokitty",
+        inStock: true,
+        images: ["collier-hello-kitty-acier-inoxydable-1.jpeg", "collier-hello-kitty-acier-inoxydable-2.jpeg", "collier-hello-kitty-acier-inoxydable-3.jpeg"],
+        badge: "Best",
+        img: "collier-hello-kitty-acier-inoxydable-1.jpeg",// Default
+        desc: "Collier Hello Kitty en acier inoxydable.",
+    },
+    {
+        id: 12,
+        name: "Sac Hello Kitty",
+        price: 160,
+        oldPrice: 199,
+        cat: "hellokitty",
+        inStock: true,
+        images: ["sac-hello-kitty-1.jpeg", "sac-hello-kitty-2.jpeg", "sac-hello-kitty-3.jpeg", "sac-hello-kitty-4.jpeg"],
+        badge: "Best",
+        img: "sac-hello-kitty-1.jpeg",// Default
+        desc: "Sac Hello Kitty. 38cm/31cm/6cm",
+    },
+    {
+        id: 13,
+        name: "Waist Chains",
+        price: 100,
+        oldPrice: 150,
+        cat: "accessoires",
+        inStock: false,
+        badge: "Best",
+        img: "waist-chains-1.jpeg", // Default
+        desc: "Waist Chains.",
+        variants: [
+            { name: "1", img: "waist-chains-1.jpeg", stock: 1 },
+            { name: "2", img: "waist-chains-2.jpeg", stock: 1 },
+            { name: "3", img: "waist-chains-3.jpeg", stock: 1 },
+            { name: "4", img: "waist-chains-4.jpeg", stock: 1 },
+            { name: "5", img: "waist-chains-5.jpeg", stock: 1 },
+        ],
+        variantStyle: 'button', // Use buttons for variants
+        requireVariantSelection: true // Force selection
+    },
+
 ];
 
 // --- CONFIG: HERO SLIDES (Editable) ---
 const heroSlides = [
     {
-        image: "Background.png", // Using generic bg as requested
+        image: "Background.png",
         tag: "New Arrival 🔥",
         title: "Trending <br>Chinese Jackets",
         buttons: [
@@ -86,21 +217,82 @@ const heroSlides = [
 ];
 
 // --- STATE ---
-let cart = JSON.parse(localStorage.getItem('cart_v23') || '[]'); // New version for schema change
+let cart = [];
+try {
+    cart = JSON.parse(localStorage.getItem('cart_v24') || '[]');
+} catch (e) {
+    console.error("Cart parse error:", e);
+    cart = [];
+}
 let activeCat = 'all';
 let historyStack = ['home'];
 let selectedCity = null;
 let activeProductId = null;
 let activeVariantIndex = 0;
+let activeSize = null;
+// let inventory = {}; // Removed
+let pdpInterval = null; // Store interval ID
+
+// --- INVENTORY MANAGEMENT ---
+// Stock is managed directly in the products array (static).
+// No localStorage persistence for inventory.
+
+function getStock(id, variantIndex, size = null) {
+    const p = products.find(x => x.id === id);
+    if (!p) return 0;
+
+    // Explicitly out of stock at product level
+    if (p.inStock === false) return 0;
+
+    // Direct check on product/variant data
+    let stockVal = 0;
+
+    if (p.variants && p.variants.length > variantIndex) {
+        stockVal = p.variants[variantIndex].stock;
+    } else {
+        // Fallback for products without variants (e.g. single item)
+        stockVal = (typeof p.stock !== 'undefined') ? p.stock : 10;
+    }
+
+    // handle varied types
+    if (typeof stockVal === 'object') {
+        if (size) {
+            return stockVal[size] || 0;
+        }
+        // If no size specific, return sum (if > 0, variant is available)
+        return Object.values(stockVal).reduce((a, b) => a + b, 0);
+    }
+
+    if (stockVal === true) return 100; // Unlimited
+    if (typeof stockVal === 'number') return stockVal;
+
+    return 0; // Default out if not specified properly
+}
+
+function reduceStock() {
+    // No-op. We do not reduce stock in this static version.
+}
 
 // --- INIT ---
 window.onload = () => {
-    navigate('home', false);
-    updateCart();
+    // Clear old inventory to avoid confusion if needed
+    localStorage.removeItem('inventory_v1');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('product')) {
+        openProduct(parseInt(urlParams.get('product')));
+    } else if (localStorage.getItem('lastView') === 'shop') {
+        navigate('shop');
+    } else {
+        navigate('home');
+    }
+
     renderHero();
     startSlider();
     renderProducts();
     renderShop();
+    renderCartList();
+    updateCart();
     populateCities();
 };
 
@@ -137,20 +329,18 @@ function startSlider() {
 function navigate(viewId, push = true) {
     if (push) historyStack.push(viewId);
 
-    // Hide all views
     if (viewId === 'checkout' && cart.length === 0) {
         showToast("Votre panier est vide ! 🛒");
         return;
     }
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-    // Show target
+
     const target = document.getElementById(`view-${viewId}`);
     if (target) {
         target.classList.add('active');
         window.scrollTo(0, 0);
     }
 
-    // Update Nav State
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
@@ -160,9 +350,7 @@ function navigate(viewId, push = true) {
     const tabBtn = document.getElementById(`tab-${viewId}`);
     if (tabBtn) tabBtn.classList.add('active');
 
-    // Special logic for shop resets
     if (viewId === 'shop') renderShop();
-    // Special logic for checkout
     if (viewId === 'checkout') {
         renderCheckoutItems();
         updateCheckoutTotal();
@@ -176,6 +364,7 @@ function goBack() {
     } else {
         navigate('home', false);
     }
+    stopPDPAutoSlide(); // Cleanup when leaving
 }
 
 // --- PRODUCT RENDERING ---
@@ -184,10 +373,15 @@ function createCard(p) {
         ? `<span class="price-sale">${p.price} DH</span> <s style="font-size:0.85em; opacity:0.5; font-weight:400;">${p.oldPrice}</s>`
         : `${p.price} DH`;
 
-    const badgeHtml = p.badge ? `<div class="tag-sale">${p.badge}</div>` : '';
+    let badgeHtml = '';
+    if (p.inStock === false) {
+        badgeHtml = `<div class="tag-sale tag-out-of-stock">Rupture</div>`;
+    } else if (p.badge) {
+        badgeHtml = `<div class="tag-sale">${p.badge}</div>`;
+    }
 
     return `
-    <div class="card" onclick="openProduct(${p.id})">
+    <div class="card ${p.inStock === false ? 'out-of-stock' : ''}" onclick="openProduct(${p.id})">
       <div class="card-img-box">
         ${badgeHtml}
         <img src="${p.img}" class="card-img" alt="${p.name}" loading="lazy">
@@ -201,8 +395,11 @@ function createCard(p) {
 function renderProducts() {
     const container = document.getElementById('homeGrid');
     if (!container) return;
-    // Show top 4 items for home
-    container.innerHTML = products.slice(0, 4).map(createCard).join('');
+
+    // Sort products: in-stock first
+    const sorted = sortProducts(products);
+
+    container.innerHTML = sorted.slice(0, 4).map(createCard).join('');
 }
 
 function renderShop() {
@@ -213,12 +410,25 @@ function renderShop() {
     if (activeCat === 'sale') filtered = products.filter(p => p.oldPrice > 0);
     else if (activeCat !== 'all') filtered = products.filter(p => p.cat === activeCat);
 
-    // update chips
     document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
     const activeChip = document.getElementById(`filt-${activeCat}`);
     if (activeChip) activeChip.classList.add('active');
 
+    // Sort: in-stock first, then out-of-stock
+    filtered = sortProducts(filtered);
+
     container.innerHTML = filtered.map(createCard).join('');
+}
+
+function sortProducts(list) {
+    return [...list].sort((a, b) => {
+        // treating undefined inStock as true (default)
+        const aStock = (a.inStock !== false);
+        const bStock = (b.inStock !== false);
+
+        if (aStock === bStock) return 0;
+        return aStock ? -1 : 1; // true comes first
+    });
 }
 
 function filterShop(cat) {
@@ -232,40 +442,206 @@ function openProduct(id) {
     if (!p) return;
 
     activeProductId = id;
-    activeVariantIndex = 0; // Reset to first variant
+
+    // Find first variant with stock > 0
+    let firstAvailableIndex = 0;
+    if (p.variants && p.variants.length > 0) {
+        // Need to check mapped inventory because stock might be boolean true -> 100
+        // But inventory might not be init yet if we just loaded page? 
+        // Safer to just check p.variants[i].stock if it's raw from products array? 
+        // Actually inventory is the source of truth.
+
+        // Let's iterate and check inventory
+        for (let i = 0; i < p.variants.length; i++) {
+            // Check real stock using helper (handles objects/sizes/booleans)
+            const stock = getStock(p.id, i);
+            if (stock > 0) {
+                firstAvailableIndex = i;
+                break;
+            }
+        }
+    }
+
+
+    // Default selection logic
+    if (p.requireVariantSelection) {
+        activeVariantIndex = null; // No default selection
+    } else {
+        activeVariantIndex = firstAvailableIndex;
+    }
+    activeSize = null;
 
     const container = document.getElementById('pdpContainer');
-
-    // Initial Render
     renderPDP(p);
     navigate('product');
+    startPDPAutoSlide(p);
+}
+
+function startPDPAutoSlide(p) {
+    if (pdpInterval) clearInterval(pdpInterval);
+    if (!p.images || p.images.length < 2) return;
+
+    let currentIdx = 0;
+    const images = p.images;
+
+    pdpInterval = setInterval(() => {
+        currentIdx = (currentIdx + 1) % images.length;
+        // Update Image
+        const img = document.getElementById('pdpImage');
+        if (img) {
+            img.style.opacity = '0.5';
+            setTimeout(() => {
+                img.src = images[currentIdx];
+                img.style.opacity = '1';
+            }, 200);
+        }
+
+        // Update Thumbs
+        document.querySelectorAll('.pdp-thumb').forEach((t, i) => {
+            t.classList.toggle('selected', i === currentIdx);
+        });
+    }, 3000); // Change every 3 seconds
+}
+
+function stopPDPAutoSlide() {
+    if (pdpInterval) clearInterval(pdpInterval);
 }
 
 function renderPDP(p) {
     const container = document.getElementById('pdpContainer');
-    const currentVariant = p.variants[activeVariantIndex];
+    const currentVariant = (p.variants && p.variants.length > 0 && activeVariantIndex !== null)
+        ? p.variants[activeVariantIndex]
+        : { name: "Sélectionner", hex: "transparent", img: p.img };
 
-    // Fallback if variant doesn't have specific img
-    const displayImg = currentVariant.img || p.img;
+    const displayImg = (activeVariantIndex !== null && p.variants && p.variants[activeVariantIndex].img)
+        ? p.variants[activeVariantIndex].img
+        : p.img;
 
     const priceHtml = p.oldPrice > 0
         ? `<div class="price-block"><span class="price-now sale-price">${p.price} DH</span> <span class="price-was">${p.oldPrice} DH</span></div>`
         : `<div class="price-block"><span class="price-now">${p.price} DH</span></div>`;
 
-    const swatches = p.variants.map((v, i) => `
-    <div class="swatch ${i === activeVariantIndex ? 'selected' : ''}" 
-         style="background:${v.hex}" 
-         title="${v.name}" 
-         onclick="selectSwatch(${i})"></div>
-  `).join('');
+    // Render variants
+    let variantsHtml = '';
+    if (p.variants && p.variants.length > 0) {
+        if (p.variantStyle === 'button') {
+            // Render as numbered buttons
+            variantsHtml = `<div class="size-group">
+                ${p.variants.map((v, i) => {
+                const stock = getStock(p.id, i);
+                const isOutOfStock = stock <= 0;
+                const isSelected = (i === activeVariantIndex);
+                return `
+                    <button 
+                        class="size-btn ${isSelected ? 'selected' : ''}" 
+                        ${isOutOfStock ? 'disabled' : ''}
+                        onclick="selectSwatch(${i})"
+                        title="${v.name}"
+                    >${v.name}</button>`;
+            }).join('')}
+            </div>`;
+        } else {
+            // Render as color swatches
+            variantsHtml = `<div class="swatch-group">
+                ${p.variants.map((v, i) => {
+                const stock = getStock(p.id, i);
+                const isOutOfStock = stock <= 0;
+                return `
+                    <div class="swatch ${i === activeVariantIndex ? 'selected' : ''} ${isOutOfStock ? 'out-of-stock' : ''}" 
+                         style="background:${v.hex}; ${isOutOfStock ? 'opacity:0.3; cursor:not-allowed;' : ''}" 
+                         title="${v.name} ${isOutOfStock ? '(Rupture)' : ''}" 
+                         onclick="${isOutOfStock ? '' : `selectSwatch(${i})`}"></div>
+                  `;
+            }).join('')}
+            </div>`;
+        }
+    }
+
+    let galleryHtml = '';
+    // If we have an explicit images array, use it
+    const imagesToUse = (p.images && p.images.length > 0) ? p.images : null;
+
+    if (!imagesToUse && p.variants && p.variants.length > 1) {
+        // Ideally we would use variant images if unique
+    }
+
+    if (imagesToUse) {
+        galleryHtml = `<div class="pdp-gallery">
+            ${imagesToUse.map((src, i) => `<img src="${src}" class="pdp-thumb ${i === 0 ? 'selected' : ''}" onclick="switchProductImage(this.src, this)">`).join('')}
+        </div>`;
+    }
+
+    let sizeHtml = '';
+    let variantStock = 0;
+
+    if (p.sizes) {
+        sizeHtml = `
+        <label style="font-weight:700; display:block; margin-bottom:12px; margin-top:24px;">
+            Taille: <span style="font-weight:400; color:var(--color-primary);">${activeSize || 'Sélectionner'}</span>
+        </label>
+        <div class="size-group">
+            ${p.sizes.map(size => {
+            const qty = getStock(p.id, activeVariantIndex, size);
+            variantStock += qty;
+
+            const isAvailable = qty > 0;
+            const isSelected = (activeSize === size);
+
+            return `<button 
+                    class="size-btn ${isSelected ? 'selected' : ''}" 
+                    ${!isAvailable ? 'disabled' : ''}
+                    onclick="selectSize('${size}')"
+                >${size}</button>`;
+        }).join('')}
+        </div>`;
+    } else {
+        // If no sizes, check stock of selected variant or mapped sum
+        if (activeVariantIndex !== null) {
+            variantStock = getStock(p.id, activeVariantIndex);
+        } else {
+            // If no variant selected yet, check if *any* variant has stock
+            variantStock = 1; // Assume locally available so we can show "Select Option" button
+        }
+    }
+
+    let btnHtml = '';
+
+    // Check if variant selection is required
+    const variantRequired = p.requireVariantSelection && activeVariantIndex === null;
+
+    if (variantStock <= 0 && !variantRequired) {
+        // Only show out of stock if we have a valid selection that is out of stock
+        // If nothing selected, we don't know it's out of stock yet
+        btnHtml = `<button class="btn btn-primary" disabled style="flex:1; padding:18px; opacity:0.6; cursor:not-allowed; background:var(--text-gray);">Rupture de Stock</button>`;
+    } else {
+        const sizeRequired = p.sizes && !activeSize;
+
+        if (variantRequired) {
+            btnHtml = `<button class="btn btn-primary" style="flex:1; padding:18px; opacity:0.8;" onclick="showToast('Veuillez choisir une option ${p.variantStyle === 'button' ? 'numérotée' : 'de couleur'} 👇')">Add to Bag</button>`;
+        } else if (sizeRequired) {
+            btnHtml = `<button class="btn btn-primary" style="flex:1; padding:18px; opacity:0.8;" onclick="showToast('Veuillez choisir une taille 📏')">Add to Bag</button>`;
+        } else {
+            // Check specific variant stock again to be sure
+            const finalStock = activeVariantIndex !== null ? getStock(p.id, activeVariantIndex) : 1;
+            if (finalStock <= 0) {
+                btnHtml = `<button class="btn btn-primary" disabled style="flex:1; padding:18px; opacity:0.6; cursor:not-allowed; background:var(--text-gray);">Rupture de Stock</button>`;
+            } else {
+                btnHtml = `<button class="btn btn-primary" style="flex:1; padding:18px;" onclick="addToCart(activeProductId, activeVariantIndex, activeSize); showToast('Added to bag! 🛍️')">Add to Bag</button>`;
+            }
+        }
+    }
 
     container.innerHTML = `
-    <div class="pdp-visual">
-       <img src="${displayImg}" alt="${p.name}" id="pdpImage" class="fade-in-img">
+    <div class="pdp-left-col">
+        <div class="pdp-visual">
+           <img src="${displayImg}" alt="${p.name}" id="pdpImage" class="fade-in-img">
+        </div>
+        ${galleryHtml}
     </div>
     <div class="pdp-content">
        <h1>${p.name}</h1>
        <div class="pdp-badges">
+         ${p.inStock === false ? `<span class="pdp-tag" style="background:#eee; color:#666;">Rupture</span>` : ''}
          ${p.badge ? `<span class="pdp-tag">${p.badge}</span>` : ''}
          <span class="pdp-tag">${p.cat.toUpperCase()}</span>
        </div>
@@ -273,32 +649,58 @@ function renderPDP(p) {
        <p style="font-size:1.1rem; color:var(--text-gray); margin-bottom:30px; line-height:1.7;">${p.desc}</p>
        
        <label style="font-weight:700; display:block; margin-bottom:12px;">
-         Couleur: <span style="font-weight:400; color:var(--color-primary);">${currentVariant.name}</span>
+         ${p.variantStyle === 'button' ? 'Modèle' : 'Couleur'}: <span style="font-weight:400; color:var(--color-primary);">${currentVariant.name}</span>
        </label>
-       <div class="swatch-group">${swatches}</div>
+       ${variantsHtml}
        
-       <div style="display:flex; gap:16px;">
-         <button class="btn btn-primary" style="flex:1; padding:18px;" onclick="addToCart(activeProductId, activeVariantIndex); showToast('Added to bag! 🛍️')">Add to Bag</button>
+       ${sizeHtml}
+       
+       <div style="display:flex; gap:16px; margin-top:32px;">
+         ${btnHtml}
        </div>
     </div>
   `;
 }
 
+function selectSize(size) {
+    activeSize = size;
+    const p = products.find(x => x.id === activeProductId);
+    if (p) renderPDP(p);
+}
+
+function switchProductImage(src, el) {
+    stopPDPAutoSlide(); // Stop auto-play on user interaction
+    const img = document.getElementById('pdpImage');
+    if (img) {
+        img.style.opacity = '0.5';
+        setTimeout(() => {
+            img.src = src;
+            img.style.opacity = '1';
+        }, 200);
+    }
+
+    if (el) {
+        document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+}
+
 function selectSwatch(index) {
+    stopPDPAutoSlide(); // Stop auto-play so user can see the selected color
     activeVariantIndex = index;
+    activeSize = null;
     const p = products.find(x => x.id === activeProductId);
     if (p) renderPDP(p);
 }
 
 // --- CART LOGIC ---
-function addToCart(id, variantIndex = 0) {
-    // Check if same product AND same variant exists
-    const existing = cart.find(x => x.id === id && x.variantIndex === variantIndex);
+function addToCart(id, variantIndex = 0, size = null) {
+    const existing = cart.find(x => x.id === id && x.variantIndex === variantIndex && x.size === size);
 
     if (existing) {
         existing.qty++;
     } else {
-        cart.push({ id, qty: 1, variantIndex });
+        cart.push({ id, qty: 1, variantIndex, size });
     }
 
     saveCart();
@@ -328,7 +730,7 @@ function updateQty(index, delta) {
 }
 
 function saveCart() {
-    localStorage.setItem('cart_v23', JSON.stringify(cart));
+    localStorage.setItem('cart_v24', JSON.stringify(cart));
 }
 
 function updateCart() {
@@ -383,19 +785,20 @@ function renderCartList() {
         const p = products.find(x => x.id === item.id);
         if (!p) return '';
 
-        const variant = p.variants[item.variantIndex] || p.variants[0];
+        const variant = (p.variants && p.variants.length > 0) ? p.variants[item.variantIndex] : { name: "", hex: "transparent", img: p.img };
         const displayImg = variant.img || p.img;
+        const sizeLabel = item.size ? ` - ${item.size} ` : '';
 
         total += p.price * item.qty;
         return `
       <div class="cart-item">
         <div style="position:relative;">
             <img src="${displayImg}" class="cart-img">
-            <div style="position:absolute; bottom:0; right:0; background:${variant.hex}; width:16px; height:16px; border-radius:50%; border:1px solid #fff;"></div>
+            ${variant.hex !== "transparent" ? `<div style="position:absolute; bottom:0; right:0; background:${variant.hex}; width:16px; height:16px; border-radius:50%; border:1px solid #fff;"></div>` : ''}
         </div>
         <div style="flex:1;">
           <h4 style="margin-bottom:4px;">${p.name}</h4>
-          <div style="font-size:0.8rem; color:var(--text-gray); margin-bottom:4px;">${variant.name}</div>
+          <div style="font-size:0.8rem; color:var(--text-gray); margin-bottom:4px;">${variant.name}${sizeLabel}</div>
           <div style="color:var(--text-gray); font-size:0.9rem;">${p.price} DH</div>
         </div>
         <div class="qty-ctrl">
@@ -408,11 +811,8 @@ function renderCartList() {
     }).join('');
 
     document.getElementById('drawerTotal').innerText = `${total} DH`;
-
-    // also update checkout total if visible
     updateCheckoutTotal();
-
-    renderCheckoutItems(); // Sync checkout view if open
+    renderCheckoutItems();
 }
 
 function renderCheckoutItems() {
@@ -427,8 +827,9 @@ function renderCheckoutItems() {
     container.innerHTML = cart.map(item => {
         const p = products.find(prod => prod.id === item.id);
         if (!p) return '';
-        const variant = p.variants[item.variantIndex] || p.variants[0];
+        const variant = (p.variants && p.variants.length > 0) ? p.variants[item.variantIndex] : { name: "", img: p.img };
         const displayImg = variant.img || p.img;
+        const sizeLabel = item.size ? ` - ${item.size}` : '';
 
         return `
             <div style="display:flex; gap:16px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px dashed #eee; align-items:center;">
@@ -438,7 +839,7 @@ function renderCheckoutItems() {
                 </div>
                 <div style="flex:1;">
                    <div style="font-weight:700; font-size:1rem; margin-bottom:4px;">${p.name}</div>
-                   <div style="color:var(--text-gray); font-size:0.9rem;">${variant.name}</div>
+                   <div style="color:var(--text-gray); font-size:0.9rem;">${variant.name}${sizeLabel}</div>
                 </div>
                 <div style="font-weight:700; font-size:1.05rem;">${p.price * item.qty} DH</div>
             </div>
@@ -451,7 +852,6 @@ function populateCities() {
     const dropdown = document.getElementById('cityOptions');
     if (!dropdown) return;
 
-    // Sort cities by name
     cities.sort((a, b) => a.name.localeCompare(b.name));
 
     dropdown.innerHTML = '';
@@ -463,20 +863,17 @@ function populateCities() {
         dropdown.appendChild(div);
     });
 
-    // Event Listener for Trigger (Robust Mobile Handling)
     const trigger = document.getElementById('cityTrigger');
     if (trigger) {
-        // Remove old listeners to be safe (if re-run)
         const newTrigger = trigger.cloneNode(true);
         trigger.parentNode.replaceChild(newTrigger, trigger);
 
         newTrigger.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevents document click from immediately closing it
+            e.stopPropagation();
             toggleCityDropdown();
         });
     }
 
-    // Outside click closer (only add once)
     if (!window.hasClickCloseListener) {
         document.addEventListener('click', closeDropdownOutside);
         window.hasClickCloseListener = true;
@@ -499,13 +896,11 @@ function toggleCityDropdown() {
 function selectCity(city) {
     selectedCity = city;
 
-    // Update UI
     document.getElementById('cityTrigger').innerText = city.name;
     document.getElementById('cityTrigger').classList.remove('active');
     document.getElementById('cityOptions').classList.remove('open');
-    document.getElementById('cxCityValue').value = city.name; // Update hidden input
+    document.getElementById('cxCityValue').value = city.name;
 
-    // Highlight option
     document.querySelectorAll('.select-option').forEach(el => {
         el.classList.toggle('selected', el.innerText === city.name);
     });
@@ -515,8 +910,7 @@ function selectCity(city) {
         <div style="font-size:0.9rem; margin-top:8px; color:var(--color-primary);">
             Livraison: <strong>${selectedCity.price} DH</strong> <br>
             Délai: <strong>${selectedCity.time}</strong>
-        </div>
-    `;
+        </div>`;
 
     updateCheckoutTotal();
 }
@@ -534,11 +928,11 @@ function updateCheckoutTotal() {
     if (cxTotalEl) {
         if (selectedCity) {
             cxTotalEl.innerHTML = `
-                <div style="display:flex; flex-direction:column; align-items:flex-end;">
+            <div style="display:flex; flex-direction:column; align-items:flex-end;">
                     <span>${cartTotal} DH <span style="font-weight:400; font-size:0.7em; color:var(--text-gray);"> (Panier)</span></span>
                     <span style="font-weight:400; font-size:0.8em; color:var(--color-primary);">+ ${shipping} DH (Livraison)</span>
                     <span style="border-top:1px solid #ddd; margin-top:4px; padding-top:4px;">${grandTotal} DH</span>
-                </div>`;
+            </div>`;
         } else {
             cxTotalEl.innerText = `${cartTotal} DH`;
         }
@@ -549,7 +943,6 @@ function updateCheckoutTotal() {
 async function submitOrder(event) {
     event.preventDefault();
 
-    // Gather Data
     const name = document.getElementById('cxName').value;
     const phone = document.getElementById('cxPhone').value;
     const cityVal = document.getElementById('cxCityValue').value;
@@ -561,7 +954,6 @@ async function submitOrder(event) {
         return;
     }
 
-    // Calculate Total & Items String
     const cartTotal = cart.reduce((sum, item) => {
         const p = products.find(prod => prod.id === item.id);
         return sum + (p ? p.price * item.qty : 0);
@@ -572,11 +964,11 @@ async function submitOrder(event) {
     const itemsString = cart.map(item => {
         const p = products.find(prod => prod.id === item.id);
         if (!p) return 'Unknown';
-        const variant = p.variants[item.variantIndex] || p.variants[0];
-        return `${p.name} [${variant.name}] (x${item.qty})`;
+        const variant = (p.variants && p.variants.length > 0) ? p.variants[item.variantIndex] : { name: "Standard" };
+        const sizeLabel = item.size ? ` [${item.size}]` : '';
+        return `${p.name} [${variant.name}]${sizeLabel} (x${item.qty})`;
     }).join(', ');
 
-    // Prepare Form Data
     const formData = new FormData();
     formData.append(GOOGLE_FORM_ENTRY_IDS.name, name);
     formData.append(GOOGLE_FORM_ENTRY_IDS.phone, phone);
@@ -586,7 +978,6 @@ async function submitOrder(event) {
     formData.append(GOOGLE_FORM_ENTRY_IDS.total, `${grandTotal} DH`);
     formData.append(GOOGLE_FORM_ENTRY_IDS.notes, '');
 
-    // UI Feedback
     const btn = event.target.querySelector('button[type="submit"]');
     const originalText = btn.innerText;
     btn.innerText = "Traitement...";
@@ -599,8 +990,12 @@ async function submitOrder(event) {
             body: formData
         });
 
-        // Success Handling
         showToast(`Commande reçue! Merci ${name.split(' ')[0]} ✨`);
+
+        cart.forEach(item => {
+            reduceStock(item.id, item.variantIndex, item.size, item.qty);
+        });
+
         cart = [];
         saveCart();
         updateCart();
@@ -623,3 +1018,6 @@ function showToast(msg) {
     t.classList.add('active');
     setTimeout(() => t.classList.remove('active'), 3000);
 }
+
+// Cities Data
+// Cities are loaded from cities.js

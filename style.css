@@ -671,7 +671,19 @@ header {
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 800;
+    font-weight: 800;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+.tag-out-of-stock {
+    background: #e0e0e0;
+    color: #888;
+}
+
+.card.out-of-stock .card-img {
+    opacity: 0.7;
+    filter: grayscale(0.5);
 }
 
 .btn-quick-add {
@@ -732,15 +744,64 @@ header {
 }
 
 
+/* New Left Column Wrapper */
+.pdp-left-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: sticky;
+    top: 110px;
+    align-self: start;
+    /* Required for sticky to work in some grid contexts */
+    height: fit-content;
+}
+
 .pdp-visual {
     background: #f4f4f6;
     border-radius: 40px;
     overflow: hidden;
-    position: sticky;
-    top: 110px;
-    box-shadow: var(--shadow-sm);
+    /* Aspect ratio maintained */
     aspect-ratio: 1/1.1;
-    /* Taller image */
+    display: flex;
+    /* Ensure image fills */
+    box-shadow: var(--shadow-sm);
+}
+
+.pdp-gallery {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 0;
+    background: transparent;
+    margin-top: 0;
+    flex-wrap: wrap;
+    /* allow wrapping if many */
+}
+
+.pdp-thumb {
+    width: 60px;
+    /* Slightly larger again for visibility */
+    height: 60px;
+    border-radius: 12px;
+    cursor: pointer;
+    object-fit: cover;
+    border: 2px solid transparent;
+    /* No white border needed if outside */
+    background: #f4f4f6;
+    transition: all 0.3s var(--bounce);
+    opacity: 0.6;
+}
+
+.pdp-thumb:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+.pdp-thumb.selected {
+    opacity: 1;
+    border-color: var(--color-primary);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .pdp-visual img {
@@ -804,6 +865,45 @@ header {
     transform: scale(1.15);
 }
 
+.size-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.size-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    color: var(--text-dark);
+    font-weight: 700;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.size-btn:hover {
+    border-color: var(--text-dark);
+}
+
+.size-btn.selected {
+    background: var(--text-dark);
+    color: white;
+    border-color: var(--text-dark);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.size-btn:disabled {
+    opacity: 0.3;
+    background: #f4f4f6;
+    border-color: #eee;
+    color: #bbb;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
 /* Price Styling */
 .price-block {
     display: flex;
@@ -831,11 +931,18 @@ header {
     font-weight: 500;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
     .pdp-layout {
         grid-template-columns: 1fr;
         gap: 32px;
         margin-top: 10px;
+    }
+
+    .pdp-left-col {
+        position: static !important;
+        height: auto;
+        margin-bottom: 24px;
+        z-index: 0;
     }
 
     .pdp-visual {
@@ -1086,6 +1193,7 @@ header {
         margin-bottom: 8px;
     }
 }
+
 /* =========================================
    9. FOOTER
    ========================================= */
@@ -1114,7 +1222,8 @@ header {
 .footer-brand {
     font-size: 1.8rem;
     margin-bottom: 24px;
-    padding-left: 0; /* Reset nav brand check if needed */
+    padding-left: 0;
+    /* Reset nav brand check if needed */
 }
 
 .footer-story {
@@ -1135,7 +1244,8 @@ header {
 
 .footer-link-highlight:hover {
     transform: translateX(4px);
-    color: var(--color-sale); /* Using existing vibrant red/pink */
+    color: var(--color-sale);
+    /* Using existing vibrant red/pink */
 }
 
 .footer-heading {
@@ -1257,7 +1367,8 @@ header {
     width: 70px;
     height: 70px;
     border-radius: 50%;
-    background: #e0f2f1; /* default teal-ish */
+    background: #e0f2f1;
+    /* default teal-ish */
     color: #009688;
     display: flex;
     align-items: center;
@@ -1278,7 +1389,8 @@ header {
 .feature-card h3 {
     font-size: 1.25rem;
     margin-bottom: 12px;
-    font-family: 'Outfit', sans-serif; /* Explicitly use outfit */
+    font-family: 'Outfit', sans-serif;
+    /* Explicitly use outfit */
 }
 
 .feature-card p {
@@ -1298,11 +1410,12 @@ header {
     .features-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .unique-section {
         padding: 60px 0;
     }
 }
+
 /* Refined Boxy Style for Features */
 .feature-card {
     border: 1px solid rgba(0, 0, 0, 0.08);
