@@ -207,7 +207,7 @@ const products = [
         img: "pantoufles-hello-Kitty-1.jpeg", // Default
         desc: "Pantoufles Hello Kitty.",
         variants: [
-            { name: "37-38-39", img: "pantoufles-hello-kitty-1.jpeg", stock: 1 },
+            { name: "37-38-39", img: "pantoufles-hello-Kitty-1.jpeg", stock: 1 },
         ],
         variantStyle: 'button', // Use buttons for variants
         requireVariantSelection: true // Force selection
@@ -1078,4 +1078,5 @@ function showToast(msg) {
 
 // Cities Data
 // Cities are loaded from cities.js
+
 
