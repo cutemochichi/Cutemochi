@@ -202,7 +202,7 @@ const products = [
 // --- CONFIG: HERO SLIDES (Editable) ---
 const heroSlides = [
     {
-        image: "Background.jpg",
+        image: "background1.jpeg",
         tag: "New Arrival 🔥",
         title: "Trending <br>Chinese Jackets",
         buttons: [
@@ -210,7 +210,7 @@ const heroSlides = [
         ]
     },
     {
-        image: "Background.jpg",
+        image: "background2.jpeg",
         tag: "Soft & Cute 🎀",
         title: "Cozy Hello Kitty <br>Collection",
         buttons: [
