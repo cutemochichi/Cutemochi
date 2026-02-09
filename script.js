@@ -196,6 +196,23 @@ const products = [
         variantStyle: 'button', // Use buttons for variants
         requireVariantSelection: true // Force selection
     },
+    {
+        id: 14,
+        name: "Pantoufles Hello Kitty",
+        price: 150,
+        cat: "hellokitty",
+        inStock: true,
+        images: ["pantoufles-hello-kitty-1.jpeg", "pantoufles-hello-kitty-2.jpeg"],
+        badge: "Best",
+        img: "pantoufles-hello-kitty-1.jpeg", // Default
+        desc: "Pantoufles Hello Kitty.",
+        variants: [
+            { name: "37-38-39", img: "pantoufles-hello-kitty-1.jpeg", stock: 1 },
+        ],
+        variantStyle: 'button', // Use buttons for variants
+        requireVariantSelection: true // Force selection
+    },
+
 
 ];
 
