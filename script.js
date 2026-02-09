@@ -202,9 +202,9 @@ const products = [
         price: 150,
         cat: "hellokitty",
         inStock: true,
-        images: ["pantoufles-hello-kitty-1.jpeg", "pantoufles-hello-kitty-2.jpeg"],
+        images: ["pantoufles-hello-Kitty-1.jpeg", "pantoufles-hello-Kitty-2.jpeg"],
         badge: "Best",
-        img: "pantoufles-hello-kitty-1.jpeg", // Default
+        img: "pantoufles-hello-Kitty-1.jpeg", // Default
         desc: "Pantoufles Hello Kitty.",
         variants: [
             { name: "37-38-39", img: "pantoufles-hello-kitty-1.jpeg", stock: 1 },
@@ -1078,3 +1078,4 @@ function showToast(msg) {
 
 // Cities Data
 // Cities are loaded from cities.js
+
