@@ -1,17 +1,25 @@
-
 // --- ADMIN LOGIC ---
-let products = []; // <--- Added: Local variable for products
+const API_URL = "https://newcute-api.cutesyfinds-shop.workers.dev"; // Use the same Worker URL
+let products = [];
 let editingId = null;
 let draggedItem = null;
 
 // Render products on load
 window.onload = async () => {
-    // Wait for the main script to fetch products, or fetch them ourselves
-    if (!products || products.length === 0) {
-        await fetchProducts();
-    }
+    await fetchProducts();
     renderAdminList();
 };
+
+async function fetchProducts() {
+    try {
+        const res = await fetch(`${API_URL}/api/products`);
+        if (!res.ok) throw new Error("Failed to fetch products");
+        products = await res.json();
+    } catch (e) {
+        console.error("Error loading products:", e);
+        alert("Error loading products. Check console.");
+    }
+}
 
 function renderAdminList() {
     const list = document.getElementById('productList');
