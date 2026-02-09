@@ -402,20 +402,4 @@ function closeModal() {
     document.getElementById('editModal').classList.remove('open');
 }
 
-function exportData() {
-    const dataStr = "const products = " + JSON.stringify(products, null, 4) + ";";
-    const blob = new Blob([dataStr], { type: "text/javascript" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "products.js";
-    document.body.appendChild(a);
-    a.click();
-
-    setTimeout(() => {
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        alert("Downloaded! 💾\n\n1. Go to your folder.\n2. Delete old 'products.js'.\n3. Rename downloaded file to 'products.js'.");
-    }, 0);
-}
+// Export function removed (API is now used)
