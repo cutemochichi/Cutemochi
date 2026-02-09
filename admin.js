@@ -368,7 +368,7 @@ async function saveProduct(e) {
         }
 
         // Optimistic UI Update (Update screen before waiting for server)
-        const btn = document.querySelector('#editModal .btn-primary');
+        const btn = document.querySelector('#editModal .btn-success');
         const oldText = btn.innerText;
         btn.innerText = "Saving...";
         btn.disabled = true;
@@ -387,9 +387,9 @@ async function saveProduct(e) {
     } catch (err) {
         alert("Error saving: " + err.message);
     } finally {
-        const btn = document.querySelector('#editModal .btn-primary');
+        const btn = document.querySelector('#editModal .btn-success');
         if (btn) {
-            btn.innerText = "Save";
+            btn.innerText = "Save Product";
             btn.disabled = false;
         }
     }
