@@ -42,7 +42,7 @@ const products = [
         cat: "hellokitty",
         badge: "Best",
         img: "pantalon-hello-kitty-1.jpeg", // Default
-        desc: "hello kitty pijama.",
+        desc: "hello kitty pyjama.",
         variants: [
             { name: "Blanc", hex: "#ffffffff", img: "pantalon-hello-kitty-1.jpeg", stock: { XS: 0, S: 1, M: 0, L: 0 } },
             { name: "Rose", hex: "#ff4181ff", img: "pantalon-hello-kitty-2.jpeg", stock: { XS: 0, S: 0, M: 0, L: 0 } },
@@ -90,7 +90,7 @@ const products = [
             { name: "3", hex: "#e1b4b4", img: "cute-bandana-3.jpeg", stock: 1 },
             { name: "4", hex: "#9c9443", img: "cute-bandana-4.jpeg", stock: 1 },
             { name: "5", hex: "#587853", img: "cute-bandana-5.jpeg", stock: 1 },
-            { name: "6", hex: "#b8bfda", img: "cute-bandana-6.jpeg", stock: 1 },
+            { name: "6", hex: "#b8bfda", img: "cute-bandana-6.jpeg", stock: 0 },
         ]
     },
     {
