@@ -16,205 +16,37 @@ const GOOGLE_FORM_ENTRY_IDS = {
 const GOOGLE_FORM_URL = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_ID}/formResponse`;
 
 // --- DATA ---
-const products = [
-    {
-        id: 1,
-        name: "Adidas Chinese New Year jacket",
-        price: 250,
-        cat: "autres",
-        inStock: true,
-        badge: "Best",
-        img: "adidas-chinese-new-year-jacket-purple.jpg", // Default
-        desc: "Chinese Jacket Become like a real one.",
-        variants: [
-            { name: "violet", hex: "#d0a2be", img: "adidas-chinese-new-year-jacket-purple.jpg", stock: { "S/M": 0, "M/L": 0 } },
-            { name: "Roseclair", hex: "#fdcddd", img: "adidas-chinese-new-year-jacket-lightpink.jpg", stock: { "S/M": 0, "M/L": 1 } },
-            { name: "Bleu", hex: "#012d6a", img: "adidas-chinese-new-year-jacket-blue.jpg", stock: { "S/M": 0, "M/L": 0 } },
-            { name: "Orange", hex: "#c44123", img: "adidas-chinese-new-year-jacket-orange.jpg", stock: { "S/M": 0, "M/L": 1 } },
-            { name: "Rose", hex: "#d1738d", img: "adidas-chinese-new-year-jacket-pink.jpg", stock: { "S/M": 0, "M/L": 0 } },
-        ],
-        sizes: ["S/M", "M/L"]
-    },
-    {
-        id: 2,
-        name: "Pantalon Hello Kitty",
-        price: 150,
-        cat: "hellokitty",
-        badge: "Best",
-        img: "pantalon-hello-kitty-1.jpeg", // Default
-        desc: "hello kitty pyjama.",
-        variants: [
-            { name: "Blanc", hex: "#ffffffff", img: "pantalon-hello-kitty-1.jpeg", stock: { XS: 0, S: 1, M: 0, L: 0 } },
-            { name: "Rose", hex: "#ff4181ff", img: "pantalon-hello-kitty-2.jpeg", stock: { XS: 0, S: 0, M: 0, L: 0 } },
-            { name: "Noir", hex: "#000000ff", img: "pantalon-hello-kitty-3.jpeg", stock: { XS: 0, S: 0, M: 0, L: 0 } },
-        ],
-        sizes: ["XS", "S", "M", "L"]
-    },
-    {
-        id: 3,
-        name: "Hello Kitty UGGs",
-        price: 260,
-        cat: "hellokitty",
-        badge: "Best",
-        img: "hello-kitty-uggs-1.jpeg", // Default
-        desc: "hello kitty UGGs.",
-        variants: [
-            { name: "Rose", hex: "#ffffffff", img: "hello-kitty-uggs-1.jpeg", stock: 0 },
-            { name: "Maron", hex: "#ffa379d5", img: "hello-kitty-uggs-2.jpeg", stock: 0 },
-            { name: "Noir", hex: "#ec5a058f", img: "hello-kitty-uggs-3.jpeg", stock: 1 },
-        ],
-        sizes: ["37-38-39"]
-    },
-    {
-        id: 4,
-        name: "Pearl Necklace",
-        price: 160,
-        cat: "accessoires",
-        inStock: false,
-        images: ["pearl-necklace-1.jpeg", "pearl-necklace-2.jpeg", "pearl-necklace-3.jpeg", "pearl-necklace-4.jpeg", "pearl-necklace-5.jpeg"],
-        badge: "Best",
-        img: "pearl-necklace-1.jpeg", // Default
-        desc: "Pearl Necklace.",
-    },
-    {
-        id: 5,
-        name: "Cute Bandana",
-        price: 40,
-        cat: "accessoires",
-        badge: "Best",
-        img: "cute-bandana-1.jpeg", // Default
-        desc: "Cute Bandana.",
-        variants: [
-            { name: "1", hex: "#bf1b32", img: "cute-bandana-1.jpeg", stock: 1 },
-            { name: "2", hex: "#e2cdb2", img: "cute-bandana-2.jpeg", stock: 1 },
-            { name: "3", hex: "#e1b4b4", img: "cute-bandana-3.jpeg", stock: 1 },
-            { name: "4", hex: "#9c9443", img: "cute-bandana-4.jpeg", stock: 1 },
-            { name: "5", hex: "#587853", img: "cute-bandana-5.jpeg", stock: 1 },
-            { name: "6", hex: "#b8bfda", img: "cute-bandana-6.jpeg", stock: 0 },
-        ]
-    },
-    {
-        id: 6,
-        name: "Mikasa Scarf",
-        price: 120,
-        cat: "accessoires",
-        inStock: true,
-        images: ["mikasa-scarf-1.jpeg", "mikasa-scarf-2.jpeg"],
-        badge: "Best",
-        img: "mikasa-scarf-1.jpeg", // Default
-        desc: "Mikasa Scarf.",
-    },
-    {
-        id: 7,
-        name: "Lampe Tulip",
-        price: 89,
-        cat: "deco",
-        inStock: false,
-        images: ["lampe-tulip-1.jpeg", "lampe-tulip-2.jpeg"],
-        badge: "Best",
-        img: "lampe-tulip-1.jpeg", // Default
-        desc: "Lampe Tulip.",
-    },
-    {
-        id: 8,
-        name: "Ceinture Vintage",
-        price: 190,
-        cat: "accessoires",
-        inStock: false,
-        badge: "Best",
-        img: "ceinture-vintage-1.jpeg", // Default
-        desc: "Ceinture Vintage.",
-        variants: [
-            { name: "1", img: "ceinture-vintage-1.jpeg", stock: 1 },
-            { name: "2", img: "ceinture-vintage-2.jpeg", stock: 1 },
-        ],
-        variantStyle: 'button', // Use buttons for variants
-        requireVariantSelection: true // Force selection
-    },
-    {
-        id: 9,
-        name: "Lunettes MiuMiu anti-reflets",
-        price: 90,
-        cat: "accessoires",
-        inStock: true,
-        images: ["lunettes-miumiu-1.jpeg", "lunettes-miumiu-2.jpeg", "lunettes-miumiu-3.jpeg", "lunettes-miumiu-4.jpeg", "lunettes-miumiu-5.jpeg"],
-        badge: "Best",
-        img: "lunettes-miumiu-1.jpeg", // Default
-        desc: "Lunettes MiuMiu anti-reflets For The best cozy nights.",
-    },
-    {
-        id: 10,
-        name: "Tenue Maroc personnalisé",
-        price: 360,
-        cat: "autres",
-        inStock: true,
-        images: ["tenue-maroc-personnalisee-1.jpeg", "tenue-maroc-personnalisee-2.jpeg", "tenue-maroc-personnalisee-3.jpeg", "tenue-maroc-personnalisee-4.jpeg", "tenue-maroc-personnalisee-5.jpeg"],
-        badge: "Best",
-        img: "tenue-maroc-personnalisee-1.jpeg",// Default
-        desc: "Tenue Maroc personnalisé.",
-    },
-    {
-        id: 11,
-        name: "Collier Hello Kitty en acier inoxydable",
-        price: 40,
-        cat: "hellokitty",
-        inStock: true,
-        images: ["collier-hello-kitty-acier-inoxydable-1.jpeg", "collier-hello-kitty-acier-inoxydable-2.jpeg", "collier-hello-kitty-acier-inoxydable-3.jpeg"],
-        badge: "Best",
-        img: "collier-hello-kitty-acier-inoxydable-1.jpeg",// Default
-        desc: "Collier Hello Kitty en acier inoxydable.",
-    },
-    {
-        id: 12,
-        name: "Sac Hello Kitty",
-        price: 160,
-        oldPrice: 199,
-        cat: "hellokitty",
-        inStock: true,
-        images: ["sac-hello-kitty-1.jpeg", "sac-hello-kitty-2.jpeg", "sac-hello-kitty-3.jpeg", "sac-hello-kitty-4.jpeg"],
-        badge: "Best",
-        img: "sac-hello-kitty-1.jpeg",// Default
-        desc: "Sac Hello Kitty. 38cm/31cm/6cm",
-    },
-    {
-        id: 13,
-        name: "Waist Chains",
-        price: 100,
-        oldPrice: 150,
-        cat: "accessoires",
-        inStock: false,
-        badge: "Best",
-        img: "waist-chains-1.jpeg", // Default
-        desc: "Waist Chains.",
-        variants: [
-            { name: "1", img: "waist-chains-1.jpeg", stock: 1 },
-            { name: "2", img: "waist-chains-2.jpeg", stock: 1 },
-            { name: "3", img: "waist-chains-3.jpeg", stock: 1 },
-            { name: "4", img: "waist-chains-4.jpeg", stock: 1 },
-            { name: "5", img: "waist-chains-5.jpeg", stock: 1 },
-        ],
-        variantStyle: 'button', // Use buttons for variants
-        requireVariantSelection: true // Force selection
-    },
-    {
-        id: 14,
-        name: "Pantoufles Hello Kitty",
-        price: 150,
-        cat: "hellokitty",
-        inStock: true,
-        images: ["pantoufles-hello-Kitty-1.jpeg", "pantoufles-hello-Kitty-2.jpeg"],
-        badge: "Best",
-        img: "pantoufles-hello-Kitty-1.jpeg", // Default
-        desc: "Pantoufles Hello Kitty.",
-        variants: [
-            { name: "37-38-39", img: "pantoufles-hello-Kitty-1.jpeg", stock: 1 },
-        ],
-        variantStyle: 'button', // Use buttons for variants
-        requireVariantSelection: true // Force selection
-    },
+// --- DATA ---
+// Products are fetched from the Cloudflare Worker API
+const API_URL = "https://newcute-api.cutesyfinds-shop.workers.dev"; // <--- PASTE YOUR WORKER URL HERE LATER
+let products = []; // Will be populated from API
+
+async function fetchProducts() {
+    if (!API_URL || API_URL === "YOUR_WORKER_URL_HERE") {
+        console.warn("API URL not set. Falling back to local/cached data if available.");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/api/products`);
+        if (!res.ok) throw new Error("Failed to fetch products");
+        products = await res.json();
+
+        // Re-render everything that depends on products
+        renderProducts();
+        renderShop();
+
+        // If on admin page, render admin list
+        if (typeof renderAdminList === 'function') {
+            renderAdminList();
+        }
+    } catch (e) {
+        console.error("Error loading products:", e);
+        showToast("Erreur de chargement des produits ⚠️");
+    }
+}
 
 
-];
 
 // --- CONFIG: HERO SLIDES (Editable) ---
 const heroSlides = [
@@ -298,6 +130,8 @@ function reduceStock() {
 
 // --- INIT ---
 window.onload = () => {
+    fetchProducts(); // <--- Fetch data on load
+
     // Cache DOM Elements
     elements.heroSlider = document.getElementById('heroSlider');
     elements.homeGrid = document.getElementById('homeGrid');
@@ -1078,5 +912,3 @@ function showToast(msg) {
 
 // Cities Data
 // Cities are loaded from cities.js
-
-

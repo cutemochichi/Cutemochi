@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cutesy Finds | HQ</title>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&family=Quicksand:wght@600;700&display=swap"
+        rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        :root {
+            --color-primary: #ff477e;
+            --color-primary-soft: #ff8fa3;
+            --color-bg: #fff0f3;
+            --color-surface: #ffffff;
+            --color-text: #2d2d2d;
+            --color-text-light: #666;
+            --color-border: #fce4ec;
+            --shadow-sm: 0 4px 6px rgba(255, 71, 126, 0.05);
+            --shadow-md: 0 8px 24px rgba(255, 71, 126, 0.1);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            margin: 0;
+            padding: 32px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            background: var(--color-surface);
+            padding: 24px 32px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--color-primary);
+            font-family: 'Quicksand', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 71, 126, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--color-primary);
+            border: 2px solid var(--color-primary);
+        }
+
+        .btn-outline:hover {
+            background: #fff5f8;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background: #00b894;
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+        }
+
+        /* PRODUCT LIST */
+        .product-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .product-card {
+            background: var(--color-surface);
+            padding: 16px 24px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--color-border);
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: scale(1.01);
+            border-color: var(--color-primary-soft);
+        }
+
+        .drag-handle {
+            color: #ddd;
+            cursor: grab;
+            padding: 4px;
+        }
+
+        .drag-handle:hover {
+            color: var(--color-primary);
+        }
+
+        .product-img {
+            width: 72px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            background: #f0f0f0;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            color: var(--color-text);
+        }
+
+        .product-meta {
+            font-size: 0.9rem;
+            color: var(--color-text-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tag {
+            background: #eee;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .tag.out-of-stock {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* ACTIONS */
+        .product-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #f5f5f5;
+            color: #666;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-edit {
+            color: #0984e3;
+            background: #e3f2fd;
+        }
+
+        .btn-edit:hover {
+            background: #bbdefb;
+        }
+
+        .btn-delete {
+            color: #d63031;
+            background: #ffebee;
+        }
+
+        .btn-delete:hover {
+            background: #ffcdd2;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(45, 12, 29, 0.6);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal.open {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal.open .modal-content {
+            transform: translateY(0);
+        }
+
+        /* FORM STYLES */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        /* VARIANTS */
+        .variants-section {
+            background: #fff8fa;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 24px;
+            border: 2px dashed #fce4ec;
+        }
+
+        .variant-item {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        /* Stock inputs grid */
+        .stock-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 2;
+        }
+
+        .stock-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f9f9f9;
+            padding: 4px;
+            border-radius: 6px;
+            min-width: 50px;
+        }
+
+        .stock-cell label {
+            font-size: 0.75rem;
+            margin-bottom: 2px;
+            color: #888;
+        }
+
+        .stock-cell input {
+            padding: 4px;
+            text-align: center;
+            border: 1px solid #ddd;
+            height: 32px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div style="display:flex; align-items:center; gap:24px;">
+                <h1>
+                    <span class="material-symbols-rounded" style="font-size:32px;">stars</span>
+                    HQ
+                </h1>
+                <a href="index.html" class="btn btn-outline">
+                    <span class="material-symbols-rounded">storefront</span>
+                    Back to Shop
+                </a>
+            </div>
+            <div style="display:flex; gap:12px;">
+                <button class="btn" onclick="addNewProduct()">
+                    <span class="material-symbols-rounded">add</span>
+                    New Product
+                </button>
+                <button class="btn btn-success" onclick="exportData()">
+                    <span class="material-symbols-rounded">save</span>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+
+        <!-- PRODUCT LIST -->
+        <div id="productList" class="product-list">
+            <!-- Products rendered here -->
+        </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                <h2 id="modalTitle" style="margin:0; font-size:1.8rem;">Edit Product</h2>
+                <button class="btn-icon" onclick="closeModal()">
+                    <span class="material-symbols-rounded">close</span>
+                </button>
+            </div>
+
+            <form id="productForm" onsubmit="saveProduct(event)">
+                <input type="hidden" id="p_id">
+
+                <div class="row">
+                    <div class="col form-group">
+                        <label>Product Name</label>
+                        <input id="p_name" required placeholder="e.g. Hello Kitty Bag">
+                    </div>
+                    <div class="col form-group">
+                        <label>Category</label>
+                        <select id="p_cat">
+                            <option value="hellokitty">Hello Kitty</option>
+                            <option value="accessoires">Accessoires</option>
+                            <option value="deco">Déco</option>
+                            <option value="autres">Autres</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col form-group">
+                        <label>Price (DH)</label>
+                        <input id="p_price" type="number" required placeholder="0">
+                    </div>
+                    <div class="col form-group">
+                        <label>Old Price (Optional)</label>
+                        <input id="p_oldPrice" type="number" placeholder="Shows as strikethrough">
+                    </div>
+                </div>
+
+                <!-- Sizes Configuration -->
+                <div class="form-group"
+                    style="background:#f0fafe; padding:16px; border-radius:12px; border:1px solid #e1f5fe;">
+                    <label style="color:#0277bd;">📏 Size Configuration</label>
+                    <input id="p_sizes" placeholder="e.g. S, M, L (Leave empty for One Size)"
+                        onblur="refreshVariantStockInputs()">
+                    <small style="color:#546e7a; margin-top:4px; display:block;">Enter sizes separated by commas to
+                        enable size-specific stock for variants.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Image Filename</label>
+                    <div style="display:flex; gap:12px;">
+                        <input id="p_img" required placeholder="image.jpg">
+                        <!-- Preview could go here -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="p_desc" rows="3" placeholder="Product details..."></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col form-group">
+                        <label>Badge</label>
+                        <input id="p_badge" placeholder="e.g. New, Hot, Best">
+                    </div>
+                    <div class="col form-group"
+                        style="display:flex; align-items:center; gap:12px; height:100%; padding-top:24px;">
+                        <input type="checkbox" id="p_inStock" style="width:24px; height:24px;">
+                        <label style="margin:0; cursor:pointer;" for="p_inStock">Available in Stock</label>
+                    </div>
+                </div>
+
+                <div class="variants-section">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:16px; align-items:center;">
+                        <label style="margin:0;">✨ Variants (Colors/Styles)</label>
+                        <button type="button" class="btn btn-outline" style="padding:8px 16px; font-size:0.85rem;"
+                            onclick="addVariantField()">+ Add Variant</button>
+                    </div>
+                    <div id="variantsContainer"></div>
+                </div>
+
+                <div
+                    style="margin-top:32px; display:flex; justify-content:flex-end; gap:16px; border-top:1px solid #eee; padding-top:24px;">
+                    <button type="button" class="btn" style="background:#f5f5f5; color:#666;"
+                        onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Products.js removed (Now using API) -->
+    <script src="cities.js"></script>
+    <script src="admin.js"></script>
+</body>
+
+</html>
