@@ -28,10 +28,10 @@ const products = [
         desc: "Chinese Jacket Become like a real one.",
         variants: [
             { name: "violet", hex: "#d0a2be", img: "adidas-chinese-new-year-jacket-purple.jpg", stock: { "S/M": 0, "M/L": 0 } },
-            { name: "Roseclair", hex: "#fdcddd", img: "adidas-chinese-new-year-jacket-pink.jpg", stock: { "S/M": 0, "M/L": 1 } },
+            { name: "Roseclair", hex: "#fdcddd", img: "adidas-chinese-new-year-jacket-lightpink.jpg", stock: { "S/M": 0, "M/L": 1 } },
             { name: "Bleu", hex: "#012d6a", img: "adidas-chinese-new-year-jacket-blue.jpg", stock: { "S/M": 0, "M/L": 0 } },
             { name: "Orange", hex: "#c44123", img: "adidas-chinese-new-year-jacket-orange.jpg", stock: { "S/M": 0, "M/L": 1 } },
-            { name: "Rose", hex: "#d1738d", img: "adidas-chinese-new-year-jacket-darkpink.jpg", stock: { "S/M": 0, "M/L": 0 } },
+            { name: "Rose", hex: "#d1738d", img: "adidas-chinese-new-year-jacket-pink.jpg", stock: { "S/M": 0, "M/L": 0 } },
         ],
         sizes: ["S/M", "M/L"]
     },
@@ -1061,4 +1061,3 @@ function showToast(msg) {
 
 // Cities Data
 // Cities are loaded from cities.js
-
