@@ -136,7 +136,7 @@ const products = [
         name: "Lunettes MiuMiu anti-reflets",
         price: 90,
         cat: "accessoires",
-        inStock: false,
+        inStock: true,
         images: ["lunettes-miumiu-1.jpeg", "lunettes-miumiu-2.jpeg", "lunettes-miumiu-3.jpeg", "lunettes-miumiu-4.jpeg", "lunettes-miumiu-5.jpeg"],
         badge: "Best",
         img: "lunettes-miumiu-1.jpeg", // Default
@@ -147,7 +147,7 @@ const products = [
         name: "Tenue Maroc personnalisé",
         price: 360,
         cat: "autres",
-        inStock: false,
+        inStock: true,
         images: ["tenue-maroc-personnalisee-1.jpeg", "tenue-maroc-personnalisee-2.jpeg", "tenue-maroc-personnalisee-3.jpeg", "tenue-maroc-personnalisee-4.jpeg", "tenue-maroc-personnalisee-5.jpeg"],
         badge: "Best",
         img: "tenue-maroc-personnalisee-1.jpeg",// Default
@@ -1061,3 +1061,4 @@ function showToast(msg) {
 
 // Cities Data
 // Cities are loaded from cities.js
+
