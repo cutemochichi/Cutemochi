@@ -27,12 +27,13 @@ const products = [
         img: "adidas-chinese-new-year-jacket-purple.jpg", // Default
         desc: "Chinese Jacket Become like a real one.",
         variants: [
-            { name: "Mauve", hex: "#d0a2be", img: "adidas-chinese-new-year-jacket-purple.jpg", stock: 1 },
-            { name: "Rose", hex: "#fdcddd", img: "adidas-chinese-new-year-jacket-pink.jpg", stock: 1 },
-            { name: "Bleu", hex: "#012d6a", img: "adidas-chinese-new-year-jacket-blue.jpg", stock: 0 },
-            { name: "Orange", hex: "#c44123", img: "adidas-chinese-new-year-jacket-orange.jpg", stock: 1 },
-            { name: "Darkpink", hex: "#d1738d", img: "adidas-chinese-new-year-jacket-darkpink.jpg", stock: 1 },
-        ]
+            { name: "violet", hex: "#d0a2be", img: "adidas-chinese-new-year-jacket-purple.jpg", stock: { "S/M": 0, "M/L": 0 } },
+            { name: "Roseclair", hex: "#fdcddd", img: "adidas-chinese-new-year-jacket-pink.jpg", stock: { "S/M": 0, "M/L": 1 } },
+            { name: "Bleu", hex: "#012d6a", img: "adidas-chinese-new-year-jacket-blue.jpg", stock: { "S/M": 0, "M/L": 0 } },
+            { name: "Orange", hex: "#c44123", img: "adidas-chinese-new-year-jacket-orange.jpg", stock: { "S/M": 0, "M/L": 1 } },
+            { name: "Rose", hex: "#d1738d", img: "adidas-chinese-new-year-jacket-darkpink.jpg", stock: { "S/M": 0, "M/L": 0 } },
+        ],
+        sizes: ["S/M", "M/L"]
     },
     {
         id: 2,
@@ -43,11 +44,11 @@ const products = [
         img: "pantalon-hello-kitty-1.jpeg", // Default
         desc: "hello kitty pijama.",
         variants: [
-            { name: "Blanc", hex: "#ffffffff", img: "pantalon-hello-kitty-1.jpeg", stock: { S: 1, M: 0, L: 0, XL: 0 } },
-            { name: "Rose", hex: "#ff4181ff", img: "pantalon-hello-kitty-2.jpeg", stock: { S: 0, M: 0, L: 0, XL: 0 } },
-            { name: "Noir", hex: "#000000ff", img: "pantalon-hello-kitty-3.jpeg", stock: { S: 0, M: 0, L: 0, XL: 0 } },
+            { name: "Blanc", hex: "#ffffffff", img: "pantalon-hello-kitty-1.jpeg", stock: { XS: 0, S: 1, M: 0, L: 0 } },
+            { name: "Rose", hex: "#ff4181ff", img: "pantalon-hello-kitty-2.jpeg", stock: { XS: 0, S: 0, M: 0, L: 0 } },
+            { name: "Noir", hex: "#000000ff", img: "pantalon-hello-kitty-3.jpeg", stock: { XS: 0, S: 0, M: 0, L: 0 } },
         ],
-        sizes: ["S", "M", "L", "XL"]
+        sizes: ["XS", "S", "M", "L"]
     },
     {
         id: 3,
@@ -58,10 +59,11 @@ const products = [
         img: "hello-kitty-uggs-1.jpeg", // Default
         desc: "hello kitty UGGs.",
         variants: [
-            { name: "Rose", hex: "#ffffffff", img: "hello-kitty-uggs-1.jpeg", stock: 1 },
-            { name: "Maron", hex: "#e47d4d5d", img: "hello-kitty-uggs-2.jpeg", stock: 1 },
-            { name: "Noir", hex: "#000000ff", img: "hello-kitty-uggs-3.jpeg", stock: 1 },
-        ]
+            { name: "Rose", hex: "#ffffffff", img: "hello-kitty-uggs-1.jpeg", stock: 0 },
+            { name: "Maron", hex: "#ffa379d5", img: "hello-kitty-uggs-2.jpeg", stock: 0 },
+            { name: "Noir", hex: "#ec5a058f", img: "hello-kitty-uggs-3.jpeg", stock: 1 },
+        ],
+        sizes: ["37-38-39"]
     },
     {
         id: 4,
@@ -105,7 +107,8 @@ const products = [
     {
         id: 7,
         name: "Lampe Tulip",
-        cat: "accessoires",
+        price: 89,
+        cat: "deco",
         inStock: false,
         images: ["lampe-tulip-1.jpeg", "lampe-tulip-2.jpeg"],
         badge: "Best",
@@ -115,6 +118,7 @@ const products = [
     {
         id: 8,
         name: "Ceinture Vintage",
+        price: 190,
         cat: "accessoires",
         inStock: false,
         badge: "Best",
@@ -142,7 +146,7 @@ const products = [
         id: 10,
         name: "Tenue Maroc personnalisé",
         price: 360,
-        cat: "accessoires",
+        cat: "autres",
         inStock: false,
         images: ["tenue-maroc-personnalisee-1.jpeg", "tenue-maroc-personnalisee-2.jpeg", "tenue-maroc-personnalisee-3.jpeg", "tenue-maroc-personnalisee-4.jpeg", "tenue-maroc-personnalisee-5.jpeg"],
         badge: "Best",
@@ -198,7 +202,7 @@ const products = [
 // --- CONFIG: HERO SLIDES (Editable) ---
 const heroSlides = [
     {
-        image: "Background.png",
+        image: "Background.jpg",
         tag: "New Arrival 🔥",
         title: "Trending <br>Chinese Jackets",
         buttons: [
@@ -206,7 +210,7 @@ const heroSlides = [
         ]
     },
     {
-        image: "Background.png",
+        image: "Background.jpg",
         tag: "Soft & Cute 🎀",
         title: "Cozy Hello Kitty <br>Collection",
         buttons: [
@@ -681,9 +685,10 @@ function renderPDP(p) {
        ${priceHtml}
        <p style="font-size:1.1rem; color:var(--text-gray); margin-bottom:30px; line-height:1.7;">${p.desc}</p>
        
+       ${(p.variants && p.variants.length > 0) ? `
        <label style="font-weight:700; display:block; margin-bottom:12px;">
          ${p.variantStyle === 'button' ? 'Modèle' : 'Couleur'}: <span style="font-weight:400; color:var(--color-primary);">${currentVariant.name}</span>
-       </label>
+       </label>` : ''}
        ${variantsHtml}
        
        ${sizeHtml}
