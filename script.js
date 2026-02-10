@@ -452,7 +452,7 @@ function renderPDP(p) {
 
     if (imagesToUse) {
         galleryHtml = `<div class="pdp-gallery">
-            ${imagesToUse.map((src, i) => `<img src="${src}" class="pdp-thumb ${i === 0 ? 'selected' : ''}" onclick="switchProductImage(this.src, this)">`).join('')}
+            ${imagesToUse.map((src, i) => `<img src="${src}" class="pdp-thumb ${i === 0 ? 'selected' : ''}" loading="lazy" onclick="switchProductImage(this.src, this)">`).join('')}
         </div>`;
     }
 
@@ -517,6 +517,13 @@ function renderPDP(p) {
                 btnHtml = `<button class="btn btn-primary" style="flex:1; padding:18px;" onclick="addToCart(activeProductId, activeVariantIndex, activeSize); showToast('Ajouté au panier ! 🛍️')">Ajouter au panier</button>`;
             }
         }
+    }
+
+    if (variantStock > 0 && variantStock <= 3) {
+        btnHtml = `<div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+            <div style="color:#d32f2f; font-weight:700;">⚠️ Plus que ${variantStock} en stock !</div>
+            ${btnHtml}
+         </div>`;
     }
 
     container.innerHTML = `
@@ -584,7 +591,16 @@ function selectSwatch(index) {
 
 // --- CART LOGIC ---
 function addToCart(id, variantIndex = 0, size = null) {
+    const stock = getStock(id, variantIndex, size);
+
+    // Check if adding would exceed stock
     const existing = cart.find(x => x.id === id && x.variantIndex === variantIndex && x.size === size);
+    const inCartQty = existing ? existing.qty : 0;
+
+    if (inCartQty + 1 > stock) {
+        showToast(`Stock insuffisant ! Seulement ${stock} disponible(s) ⚠️`);
+        return;
+    }
 
     if (existing) {
         existing.qty++;
@@ -607,6 +623,14 @@ function removeFromCart(index) {
 function updateQty(index, delta) {
     const item = cart[index];
     if (!item) return;
+
+    if (delta > 0) {
+        const stock = getStock(item.id, item.variantIndex, item.size);
+        if (item.qty + 1 > stock) {
+            showToast(`Stock insuffisant ! Max: ${stock}`);
+            return;
+        }
+    }
 
     item.qty += delta;
     if (item.qty < 1) {
@@ -873,6 +897,22 @@ async function submitOrder(event) {
     btn.disabled = true;
 
     try {
+        // 1. DEDUCT STOCK via API
+        const orderRes = await fetch(`${API_URL}/api/orders`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: cart })
+        });
+
+        if (!orderRes.ok) {
+            const errData = await orderRes.json();
+            throw new Error(errData.error || "Order validation failed");
+        }
+
+        // 2. LOG to GOODLE SHEETS (Backup / Admin notification)
+        // We do this in parallel or after, but if this fails we still have the order in our system theoretically.
+        // But here we're just using Forms as the MAIN notifier for now.
+
         await fetch(GOOGLE_FORM_URL, {
             method: 'POST',
             mode: 'no-cors',
@@ -881,18 +921,25 @@ async function submitOrder(event) {
 
         showToast(`Commande reçue! Merci ${name.split(' ')[0]} ✨`);
 
-        cart.forEach(item => {
-            reduceStock(item.id, item.variantIndex, item.size, item.qty);
-        });
-
+        // We don't need local reduceStock anymore, as we will re-fetch products
         cart = [];
         saveCart();
         updateCart();
+
+        // Refresh products to show updated stock
+        await fetchProducts();
+
         navigate('thankyou');
 
     } catch (error) {
         console.error('Order submission failed:', error);
-        showToast("Erreur de connexion. Veuillez réessayer.");
+        if (error.message.includes("Stock insuffisant")) {
+            showToast(error.message + " ⚠️");
+            // Refresh to get latest stock
+            await fetchProducts();
+        } else {
+            showToast("Erreur de connexion. Veuillez réessayer.");
+        }
     } finally {
         btn.innerText = originalText;
         btn.disabled = false;
