@@ -6,9 +6,62 @@ let draggedItem = null;
 
 // Render products on load
 window.onload = async () => {
-    await fetchProducts();
-    renderAdminList();
+    checkLogin();
 };
+
+function checkLogin() {
+    let key = sessionStorage.getItem('adminKey');
+    if (!key) {
+        document.getElementById('loginModal').classList.add('open');
+    } else {
+        fetchProducts();
+        renderAdminList();
+    }
+}
+
+async function login(e) {
+    e.preventDefault();
+    const input = document.getElementById('adminPassword');
+    const btn = e.target.querySelector('button');
+    const err = document.getElementById('loginError');
+    const key = input.value;
+
+    if (!key) return;
+
+    btn.innerText = "Checking...";
+    btn.disabled = true;
+    err.style.display = 'none';
+
+    try {
+        const res = await fetch(`${API_URL}/api/check-auth`, {
+            headers: { 'X-Admin-Key': key }
+        });
+
+        if (res.ok) {
+            sessionStorage.setItem('adminKey', key);
+            document.getElementById('loginModal').classList.remove('open');
+            fetchProducts();
+            renderAdminList();
+        } else {
+            err.style.display = 'block';
+            input.value = '';
+            input.focus();
+        }
+    } catch (error) {
+        console.error("Login Error", error);
+        alert("Erreur de connexion");
+    } finally {
+        btn.innerText = "Unlock Dashboard";
+        btn.disabled = false;
+    }
+}
+
+function getAuthHeaders() {
+    return {
+        'Content-Type': 'application/json',
+        'X-Admin-Key': sessionStorage.getItem('adminKey') || ''
+    };
+}
 
 async function fetchProducts() {
     try {
@@ -183,8 +236,15 @@ async function deleteProduct(id) {
 
     try {
         const res = await fetch(`${API_URL}/api/products/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
+        if (res.status === 401) {
+            alert("Mot de passe incorrect ou expiré.");
+            sessionStorage.removeItem('adminKey');
+            location.reload();
+            return;
+        }
         if (!res.ok) throw new Error("Failed to delete");
 
         // Remove locally immediately for speed, then refresh
@@ -375,9 +435,16 @@ async function saveProduct(e) {
 
         const res = await fetch(url, {
             method: method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify(productData)
         });
+
+        if (res.status === 401) {
+            alert("Mot de passe incorrect !");
+            sessionStorage.removeItem('adminKey');
+            location.reload();
+            return;
+        }
 
         if (!res.ok) throw new Error("API Error");
 

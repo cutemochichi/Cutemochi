@@ -584,6 +584,11 @@ header {
         border-radius: 20px;
     }
 
+    .hero-slider-section h2 {
+        font-size: 2rem;
+        /* Smaller heading on mobile */
+    }
+
     .slide-overlay {
         background: linear-gradient(0deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.0) 100%);
         justify-content: flex-end;
@@ -633,11 +638,19 @@ header {
 
 .grid-wrap {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 32px 24px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    /* Optimised for mobile 2-col */
+    gap: 24px 16px;
+    /* Smaller gap on mobile */
     content-visibility: auto;
     contain-intrinsic-size: 1px 1000px;
-    /* Approximate height of content */
+}
+
+@media (min-width: 768px) {
+    .grid-wrap {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 32px 24px;
+    }
 }
 
 .card {
@@ -757,6 +770,20 @@ header {
     gap: 60px;
     align-items: start;
     margin-top: 40px;
+}
+
+@media (max-width: 900px) {
+    .pdp-layout {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        margin-top: 20px;
+    }
+
+    .pdp-left-col {
+        position: static;
+        width: 100%;
+        height: auto;
+    }
 }
 
 

@@ -352,6 +352,78 @@
             height: 32px;
             font-size: 0.9rem;
         }
+
+        /* MOBILE OPTIMIZATION */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                padding: 20px;
+                text-align: center;
+            }
+
+            .header>div {
+                flex-direction: column;
+                width: 100%;
+                gap: 12px !important;
+            }
+
+            .header h1 {
+                justify-content: center;
+            }
+
+            .header .btn,
+            .header .btn-outline {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .product-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .product-img {
+                width: 100%;
+                height: 200px;
+            }
+
+            .product-info {
+                width: 100%;
+            }
+
+            .product-actions {
+                width: 100%;
+                justify-content: flex-end;
+                border-top: 1px solid #eee;
+                padding-top: 12px;
+            }
+
+            /* Modal Mobile */
+            .modal-content {
+                padding: 20px;
+                width: 95%;
+                max-height: 85vh;
+            }
+
+            .row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .variant-item {
+                flex-direction: column;
+            }
+
+            .variant-item>div {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
@@ -381,6 +453,31 @@
         <!-- PRODUCT LIST -->
         <div id="productList" class="product-list">
             <!-- Products rendered here -->
+        </div>
+    </div>
+
+    <!-- LOGIN MODAL -->
+    <div class="modal" id="loginModal" style="background:var(--color-bg); z-index:2000;">
+        <div class="modal-content" style="max-width:400px; text-align:center; box-shadow:none; border:1px solid #eee;">
+            <div
+                style="background:#fff0f3; width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 24px;">
+                <span class="material-symbols-rounded" style="font-size:40px; color:var(--color-primary);">lock</span>
+            </div>
+            <h2 style="margin-top:0; margin-bottom:8px; color:var(--color-primary);">Admin Access</h2>
+            <p style="color:#666; margin-bottom:24px;">Please enter your password to continue.</p>
+
+            <p id="loginError" style="color:#d32f2f; font-weight:bold; display:none; margin-bottom:16px;">Mot de passe
+                incorrect ❌</p>
+
+            <form onsubmit="login(event)">
+                <div class="form-group">
+                    <input type="password" id="adminPassword" placeholder="Password" required
+                        style="text-align:center; padding:16px; font-size:1.1rem;">
+                </div>
+                <button type="submit" class="btn btn-primary"
+                    style="width:100%; justify-content:center; padding:16px; font-size:1.1rem;">Unlock
+                    Dashboard</button>
+            </form>
         </div>
     </div>
 
