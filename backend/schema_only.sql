@@ -13,5 +13,7 @@ CREATE TABLE products (
     variants TEXT,
     images TEXT,
     variant_style TEXT,
-    require_variant_selection INTEGER DEFAULT 0
+    variant_style TEXT,
+    require_variant_selection INTEGER DEFAULT 0,
+    order_index INTEGER DEFAULT 0
 );

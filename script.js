@@ -306,12 +306,20 @@ function renderShop() {
 
 function sortProducts(list) {
     return [...list].sort((a, b) => {
-        // treating undefined inStock as true (default)
+        // 1. Stock Priority (In Stock first)
         const aStock = (a.inStock !== false);
         const bStock = (b.inStock !== false);
 
-        if (aStock === bStock) return 0;
-        return aStock ? -1 : 1; // true comes first
+        if (aStock !== bStock) {
+            return aStock ? -1 : 1; // true gets priority
+        }
+
+        // 2. Custom Order (orderIndex)
+        // If both are in stock (or both out), use custom order
+        const aOrder = (typeof a.orderIndex === 'number') ? a.orderIndex : 9999;
+        const bOrder = (typeof b.orderIndex === 'number') ? b.orderIndex : 9999;
+
+        return aOrder - bOrder;
     });
 }
 
@@ -543,11 +551,11 @@ function renderPDP(p) {
        ${priceHtml}
        <p style="font-size:1.1rem; color:var(--text-gray); margin-bottom:30px; line-height:1.7;">${p.desc}</p>
        
-       ${(p.variants && p.variants.length > 0) ? `
+       ${(p.variants && p.variants.length > 0 && p.variants[0].name !== 'Standard') ? `
        <label style="font-weight:700; display:block; margin-bottom:12px;">
          ${p.variantStyle === 'button' ? 'Modèle' : 'Couleur'}: <span style="font-weight:400; color:var(--color-primary);">${currentVariant.name}</span>
        </label>` : ''}
-       ${variantsHtml}
+       ${(p.variants && p.variants.length > 0 && p.variants[0].name !== 'Standard') ? variantsHtml : ''}
        
        ${sizeHtml}
        

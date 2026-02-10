@@ -14,11 +14,13 @@ function checkLogin() {
     if (!key) {
         document.getElementById('loginModal').classList.add('open');
     } else {
-
-        fetchProducts().then(() => {
-            renderAdminList();
-        });
+        fetchProducts();
     }
+}
+
+function logout() {
+    sessionStorage.removeItem('adminKey');
+    location.reload();
 }
 
 async function login(e) {
@@ -43,7 +45,6 @@ async function login(e) {
             sessionStorage.setItem('adminKey', key);
             document.getElementById('loginModal').classList.remove('open');
             await fetchProducts();
-            renderAdminList();
         } else {
             err.style.display = 'block';
             input.value = '';
@@ -70,49 +71,115 @@ async function fetchProducts() {
         const res = await fetch(`${API_URL}/api/products`);
         if (!res.ok) throw new Error("Failed to fetch products");
         products = await res.json();
+        renderAdminList(products); // Initial Render
     } catch (e) {
         console.error("Error loading products:", e);
         alert("Error loading products. Check console.");
     }
 }
 
-function renderAdminList() {
-    const list = document.getElementById('productList');
-    if (!products || products.length === 0) {
-        list.innerHTML = `<p style="text-align:center;">No products found.</p>`;
+// --- RENDER LIST ---
+
+function renderAdminList(list = products) {
+    const container = document.getElementById('productList');
+    container.innerHTML = '';
+
+    // Update Stats
+    document.getElementById('totalProducts').innerText = list.length;
+
+    if (list.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#888; padding:40px;">No products found.</div>';
         return;
     }
 
-    list.innerHTML = products.map((p, index) => `
-        <div class="product-card" draggable="true" data-index="${index}">
-            <span class="material-symbols-rounded drag-handle">drag_indicator</span>
-            <img src="${p.img}" class="product-img" alt="img" onerror="this.src='https://via.placeholder.com/60'">
-            <div class="product-info">
-                <h3 class="product-title">${p.name}</h3>
-                <div class="product-meta">
-                    <span class="tag">${p.cat}</span>
-                    <span style="font-weight:700;">${p.price} DH</span>
-                    ${p.inStock === false ? '<span class="tag out-of-stock">Out of Stock</span>' : ''}
-                    ${p.sizes ? `<span style="font-size:0.8rem; color:#888;">Size: ${p.sizes.join(', ')}</span>` : ''}
+    list.forEach((p, index) => {
+        const div = document.createElement('div');
+        div.className = 'p-card';
+        // Staggered Animation
+        div.style.animation = `slideUpFade 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.05}s forwards`;
+        div.style.opacity = '0'; // Start hidden
+
+        div.dataset.index = index; // For drag & drop
+        div.draggable = true; // Enable drag
+
+        div.innerHTML = `
+            <div class="p-img-box">
+                <img src="${p.img}" class="p-img" loading="lazy">
+                ${p.badge ? `<span class="p-badge">${p.badge}</span>` : ''}
+                <div class="toggle-stock ${p.inStock ? '' : 'off'}" onclick="toggleStock(${p.id}, ${!p.inStock})">
+                    <span class="material-symbols-rounded">${p.inStock ? 'check_circle' : 'cancel'}</span>
+                    ${p.inStock ? 'In Stock' : 'Out'}
                 </div>
             </div>
-            <div class="product-actions">
-                <button class="btn-icon btn-edit" onclick="editProduct(${p.id})" title="Edit">
-                    <span class="material-symbols-rounded">edit</span>
-                </button>
-                <button class="btn-icon btn-delete" onclick="deleteProduct(${p.id})" title="Delete">
-                    <span class="material-symbols-rounded">delete</span>
-                </button>
+            <div class="p-info">
+                <h3 class="p-title">${p.name}</h3>
+                <div class="p-meta">
+                    <span>${p.cat}</span>
+                    <span class="p-price">${p.price} DH</span>
+                </div>
+                <div class="p-actions">
+                    <button class="btn-card btn-edit" onclick="editProduct(${p.id})">
+                        <span class="material-symbols-rounded">edit</span> Edit
+                    </button>
+                    <button class="btn-card btn-delete" onclick="deleteProduct(${p.id})">
+                        <span class="material-symbols-rounded">delete</span>
+                    </button>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+        container.appendChild(div);
+    });
+    setupDragAndDrop(); // Re-apply drag and drop after rendering
+}
 
-    setupDragAndDrop();
+function filterProducts() {
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = products.filter(p => p.name.toLowerCase().includes(term) || p.cat.toLowerCase().includes(term));
+    renderAdminList(filtered);
+}
+
+// --- TOGGLE STOCK ---
+async function toggleStock(id, status) {
+    // Optimistic UI update
+    const p = products.find(x => x.id === id);
+    if (p) {
+        p.inStock = status;
+        renderAdminList(document.getElementById('searchInput').value ?
+            products.filter(x => x.name.toLowerCase().includes(document.getElementById('searchInput').value.toLowerCase()))
+            : products);
+    }
+
+    try {
+        const pCurrent = products.find(x => x.id === id);
+        // We need to send full object for PUT usually, but let's see if partial works? 
+        // Logic in worker: UPDATE products SET ... takes all fields.
+        // So we must send full object.
+
+        // Let's re-use save logic payload construction or just fetch current complete obj + modify
+        // Since 'p' is already the object from 'products' array, it should be complete enough EXCEPT if we missed some props in local state.
+        // But local state 'products' comes from API 'SELECT *', so it is complete.
+
+        const payload = { ...pCurrent, inStock: status };
+
+        const res = await fetch(`${API_URL}/api/products/${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Failed to update stock');
+
+    } catch (err) {
+        alert("Error updating stock: " + err.message);
+        // Revert
+        if (p) p.inStock = !status;
+        renderAdminList();
+    }
 }
 
 // --- DRAG AND DROP ---
 function setupDragAndDrop() {
-    const cards = document.querySelectorAll('.product-card');
+    const cards = document.querySelectorAll('.p-card'); // Changed from .product-card to .p-card
     const container = document.getElementById('productList');
 
     cards.forEach(card => {
@@ -143,7 +210,7 @@ function setupDragAndDrop() {
 }
 
 function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.product-card:not(.dragging)')];
+    const draggableElements = [...container.querySelectorAll('.p-card:not(.dragging)')]; // Changed from .product-card to .p-card
 
     return draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
@@ -160,7 +227,7 @@ function updateProductOrder() {
     // Read DOM order to re-sort 'products' array
     const newOrder = [];
     const container = document.getElementById('productList');
-    container.querySelectorAll('.product-card').forEach(card => {
+    container.querySelectorAll('.p-card').forEach(card => { // Changed from .product-card to .p-card
         const index = parseInt(card.dataset.index);
         newOrder.push(products[index]);
     });
@@ -175,7 +242,7 @@ function updateProductOrder() {
 
     // Create new array based on DOM order
     const reorderedProducts = [];
-    container.querySelectorAll('.product-card').forEach(card => {
+    container.querySelectorAll('.p-card').forEach(card => { // Changed from .product-card to .p-card
         const originalIndex = parseInt(card.dataset.index);
         reorderedProducts.push(products[originalIndex]);
     });
@@ -185,7 +252,40 @@ function updateProductOrder() {
     products.push(...reorderedProducts);
 
     // Re-render to update data-indices
-    renderAdminList();
+    renderAdminList(products);
+
+    // Sync with Server
+    saveOrderToServer();
+}
+
+async function saveOrderToServer() {
+    const updates = products.map((p, index) => ({
+        id: p.id,
+        order: index
+    }));
+
+    try {
+        // Show saving state helper? (Optional, maybe just console for now or toast)
+        const toast = document.createElement('div');
+        toast.className = 'toast-saving';
+        toast.innerText = 'Saving order...';
+        document.body.appendChild(toast);
+
+        const res = await fetch(`${API_URL}/api/reorder`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ updates })
+        });
+
+        if (!res.ok) throw new Error("Failed to save order");
+
+        toast.innerText = 'Order Saved! ✅';
+        setTimeout(() => toast.remove(), 2000);
+
+    } catch (err) {
+        console.error(err);
+        alert("Failed to save order to server");
+    }
 }
 
 
@@ -196,6 +296,9 @@ function addNewProduct() {
     document.getElementById('modalTitle').innerText = "New Product";
     document.getElementById('productForm').reset();
     document.getElementById('variantsContainer').innerHTML = '';
+    document.getElementById('p_images').value = ''; // Clear images
+    document.getElementById('p_simpleStock').value = '';
+    document.getElementById('simpleStockContainer').style.display = 'block';
     document.getElementById('p_inStock').checked = true;
     openModal();
 }
@@ -220,17 +323,43 @@ function editProduct(id) {
     // Set Sizes
     document.getElementById('p_sizes').value = p.sizes ? p.sizes.join(', ') : '';
 
+    // Set Images
+    document.getElementById('p_images').value = p.images ? p.images.join(', ') : '';
+
     // Variants
     const vContainer = document.getElementById('variantsContainer');
     vContainer.innerHTML = '';
 
     if (p.variants) {
-        p.variants.forEach(v => {
-            addVariantField(v, p.sizes);
-        });
+        // Check if it's a "Standard" variant (simple product stock)
+        if (p.variants.length === 1 && p.variants[0].name === 'Standard') {
+            document.getElementById('p_simpleStock').value = p.variants[0].stock;
+            // Don't add to variants container, keep it hidden in simple stock field
+        } else {
+            p.variants.forEach(v => {
+                addVariantField(v, p.sizes);
+            });
+            document.getElementById('simpleStockContainer').style.display = 'none'; // Hide simple stock if real variants exist
+        }
+    } else {
+        document.getElementById('simpleStockContainer').style.display = 'block';
     }
 
+    toggleSimpleStockInput(); // Run visibility check
+
     openModal();
+}
+
+function toggleSimpleStockInput() {
+    const hasVariants = document.getElementById('variantsContainer').children.length > 0;
+    const stockContainer = document.getElementById('simpleStockContainer');
+
+    if (hasVariants) {
+        stockContainer.style.display = 'none';
+        document.getElementById('p_simpleStock').value = '';
+    } else {
+        stockContainer.style.display = 'block';
+    }
 }
 
 async function deleteProduct(id) {
@@ -292,13 +421,13 @@ function refreshVariantStockInputs() {
                 html += `
                     <div class="stock-cell">
                         <label>${size}</label>
-                        <input type="number" value="${val}" class="v-stock" data-size="${size}">
+                        <input type="number" value="${val}" class="v-stock-input v-stock" data-size="${size}">
                     </div>
                 `;
             });
         } else {
             let val = currentStockMap['__simple'] || Object.values(currentStockMap)[0] || 10;
-            html += `<input type="number" value="${val}" class="v-stock" style="width:100%; border-radius:8px;" placeholder="Qty">`;
+            html += `<input type="number" value="${val}" class="v-stock-input v-stock" placeholder="Qty">`;
         }
         stockContainer.innerHTML = html;
     });
@@ -325,7 +454,7 @@ function addVariantField(vData = null, sizesOverride = null) {
             stockHtml += `
             <div class="stock-cell">
                 <label>${size}</label>
-                <input type="number" value="${val}" class="v-stock" data-size="${size}">
+                <input type="number" value="${val}" class="v-stock-input v-stock" data-size="${size}">
             </div>`;
         });
     } else {
@@ -336,33 +465,86 @@ function addVariantField(vData = null, sizesOverride = null) {
                 val = Object.values(vData.stock).reduce((a, b) => a + b, 0);
             }
         }
-        stockHtml += `<input type="number" value="${val}" class="v-stock" style="width:100%; border-radius:8px;" placeholder="Qty">`;
+        stockHtml += `<input type="number" value="${val}" class="v-stock-input v-stock" placeholder="Qty">`;
     }
+
+    // State management for color (hasColor vs noColor)
+    const hasColor = hex && hex !== 'transparent';
+    const displayHex = hasColor ? hex : '#000000'; // Default picker color if adding new
 
     const div = document.createElement('div');
     div.className = 'variant-item';
+
+    // Cleaner Layout: Name & Image on top, then Stock, then optional Color
     div.innerHTML = `
-        <div style="flex:1; display:flex; flex-direction:column; gap:8px; min-width:150px;">
-            <label style="font-size:0.75rem; margin:0; color:#888;">Name</label>
-            <input placeholder="e.g. Red" value="${name}" class="v-name" style="padding:8px;">
+        <div class="v-group">
+            <label>Name</label>
+            <input placeholder="e.g. Red / Style A" value="${name}" class="v-input v-name">
         </div>
-        <div style="flex:1; display:flex; flex-direction:column; gap:8px; min-width:150px;">
-            <label style="font-size:0.75rem; margin:0; color:#888;">Image</label>
-            <input placeholder="Image" value="${img}" class="v-img" style="padding:8px;">
+
+        <div class="v-group">
+            <label>Image (Optional)</label>
+            <input placeholder="Paste URL..." value="${img}" class="v-input v-img">
         </div>
-        <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-            <label style="font-size:0.75rem; margin:0; color:#888;">Color</label>
-            <input value="${hex}" type="color" class="v-hex" style="width:40px; padding:0; height:40px; border-radius:50%; overflow:hidden; border:none; cursor:pointer;">
-        </div>
-        <div style="flex:2;">
-             <label style="font-size:0.75rem; margin:0 0 4px 0; color:#888; display:block;">Stock</label>
+
+        <div class="v-group full-width">
+             <label>Stock Control</label>
              <div class="stock-grid">${stockHtml}</div>
         </div>
-        <button type="button" class="btn-icon btn-delete" style="align-self:center;" onclick="this.closest('.variant-item').remove()">
-            <span class="material-symbols-rounded">delete</span>
+
+        <div class="v-group">
+            <label>Color (Opt)</label>
+            
+            <!-- Hidden Input to store actual value sent to DB -->
+            <input type="hidden" class="v-hex-value" value="${hasColor ? hex : 'transparent'}">
+
+            <!-- UI: Color Active State -->
+            <div class="v-color-row ${hasColor ? '' : 'hidden'}" id="colorActiveState">
+                <input type="color" class="v-color-input" value="${displayHex}" oninput="updateColorValue(this)">
+                <button type="button" class="btn-remove-color" onclick="toggleColorState(this, false)" title="Remove Color">
+                    <span class="material-symbols-rounded" style="font-size:16px;">close</span>
+                </button>
+            </div>
+
+            <!-- UI: No Color State -->
+            <div class="v-color-row ${!hasColor ? '' : 'hidden'}" id="noColorState">
+                <button type="button" class="btn-add-color" onclick="toggleColorState(this, true)">
+                    <span class="material-symbols-rounded" style="font-size:16px;">palette</span> Add Color
+                </button>
+            </div>
+        </div>
+
+        <button type="button" class="btn-delete-variant" onclick="this.closest('.variant-item').remove(); toggleSimpleStockInput();" title="Remove Variant">
+            <span class="material-symbols-rounded">close</span>
         </button>
     `;
     document.getElementById('variantsContainer').appendChild(div);
+    toggleSimpleStockInput();
+}
+
+// Helper to toggle color state
+function toggleColorState(btn, enable) {
+    const parent = btn.closest('.v-group');
+    const hiddenInput = parent.querySelector('.v-hex-value');
+    const activeState = parent.querySelector('#colorActiveState');
+    const noColorState = parent.querySelector('#noColorState');
+    const colorInput = activeState.querySelector('input[type="color"]');
+
+    if (enable) {
+        hiddenInput.value = colorInput.value; // Set to picker value
+        activeState.classList.remove('hidden');
+        noColorState.classList.add('hidden');
+    } else {
+        hiddenInput.value = 'transparent'; // Set to transparent
+        activeState.classList.add('hidden');
+        noColorState.classList.remove('hidden');
+    }
+}
+
+function updateColorValue(input) {
+    const parent = input.closest('.v-group');
+    const hiddenInput = parent.querySelector('.v-hex-value');
+    hiddenInput.value = input.value;
 }
 
 // --- SAVE ---
@@ -386,7 +568,7 @@ async function saveProduct(e) {
     variantItems.forEach(item => {
         const vName = item.querySelector('.v-name').value;
         const vImg = item.querySelector('.v-img').value;
-        const vHex = item.querySelector('.v-hex').value;
+        const vHex = item.querySelector('.v-hex-value').value; // Get robust value
 
         let stockData;
         if (sizes.length > 0) {
@@ -408,14 +590,28 @@ async function saveProduct(e) {
         });
     });
 
-    if (variants.length === 0) variants = undefined;
+    const simpleStock = document.getElementById('p_simpleStock').value;
+
+    // If no explicit variants but we have simple stock, create a Standard variant
+    if ((!variants || variants.length === 0) && simpleStock) {
+        variants = [{
+            name: 'Standard',
+            img: img, // Use main image
+            hex: '#ffffff',
+            stock: parseInt(simpleStock) || 0
+        }];
+    }
+
+    if (variants && variants.length === 0) variants = undefined;
 
     const productData = {
         name, cat, price, oldPrice, img, desc, badge, inStock,
         sizes: sizes.length > 0 ? sizes : null,
         variants: variants,
-        // Preserve existing images/style if editing (simpler logic for now)
-        images: editingId ? products.find(p => p.id === editingId).images : null,
+        // Images
+        images: document.getElementById('p_images').value.split(',').map(s => s.trim()).filter(s => s !== '').length > 0
+            ? document.getElementById('p_images').value.split(',').map(s => s.trim()).filter(s => s !== '')
+            : null,
         variantStyle: editingId ? products.find(p => p.id === editingId).variantStyle : null,
         requireVariantSelection: editingId ? products.find(p => p.id === editingId).requireVariantSelection : false
     };

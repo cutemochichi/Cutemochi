@@ -30,14 +30,12 @@ export default {
 
             // 1. GET /api/products -> List all products
             if (method === 'GET' && path === '/api/products') {
-                const { results } = await env.DB.prepare('SELECT * FROM products').all();
+                // Order by order_index by default
+                const { results } = await env.DB.prepare('SELECT * FROM products ORDER BY order_index ASC').all();
 
                 // Parse JSON fields back to objects for the frontend
                 const products = results.map(p => ({
                     ...p,
-                    // Convert snake_case DB columns to camelCase JS properties if needed, 
-                    // or just use DB columns in frontend. Let's map to existing frontend structure.
-                    // Convert snake_case DB columns to camelCase JS properties
                     id: p.id,
                     name: p.name,
                     price: p.price,
@@ -49,10 +47,10 @@ export default {
                     inStock: p.in_stock === 1,
                     variantStyle: p.variant_style,
                     requireVariantSelection: p.require_variant_selection === 1,
-                    // Parse JSON strings
                     sizes: p.sizes ? JSON.parse(p.sizes) : undefined,
                     variants: p.variants ? JSON.parse(p.variants) : undefined,
                     images: p.images ? JSON.parse(p.images) : undefined,
+                    orderIndex: p.order_index || 0
                 }));
 
                 return new Response(JSON.stringify(products), {
@@ -65,9 +63,13 @@ export default {
                 if (!checkAuth(request)) return new Response("Unauthorized", { status: 401, headers: corsHeaders });
                 const data = await request.json();
 
+                // Get max order index to append to end
+                const { count } = await env.DB.prepare('SELECT MAX(order_index) as count FROM products').first();
+                const newOrderIndex = (count || 0) + 1;
+
                 const stmt = env.DB.prepare(`
-          INSERT INTO products (name, cat, price, old_price, img, desc, badge, in_stock, sizes, variants, images, variant_style, require_variant_selection)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO products (name, cat, price, old_price, img, desc, badge, in_stock, sizes, variants, images, variant_style, require_variant_selection, order_index)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
 
                 await stmt.bind(
@@ -83,7 +85,8 @@ export default {
                     data.variants ? JSON.stringify(data.variants) : null,
                     data.images ? JSON.stringify(data.images) : null,
                     data.variantStyle || null,
-                    data.requireVariantSelection ? 1 : 0
+                    data.requireVariantSelection ? 1 : 0,
+                    newOrderIndex
                 ).run();
 
                 return new Response(JSON.stringify({ success: true }), {
@@ -97,8 +100,7 @@ export default {
                 const id = path.split('/').pop();
                 const data = await request.json();
 
-                // Dynamic Update Query
-                // For simplicity in this "Copy/Paste" version, we'll update everything.
+                // We don't update order_index here usually, unless specified
                 const stmt = env.DB.prepare(`
           UPDATE products SET 
             name = ?, cat = ?, price = ?, old_price = ?, img = ?, desc = ?, badge = ?, in_stock = ?, 
@@ -125,6 +127,26 @@ export default {
 
                 return new Response(JSON.stringify({ success: true }), {
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                });
+            }
+
+            // 7. PUT /api/reorder -> Bulk update order
+            if (method === 'PUT' && path === '/api/reorder') {
+                if (!checkAuth(request)) return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+                const { updates } = await request.json(); // [{id: 1, order: 0}, {id: 2, order: 1}]
+
+                if (!updates || !Array.isArray(updates)) {
+                    return new Response("Invalid data", { status: 400, headers: corsHeaders });
+                }
+
+                const statements = updates.map(u =>
+                    env.DB.prepare('UPDATE products SET order_index = ? WHERE id = ?').bind(u.order, u.id)
+                );
+
+                await env.DB.batch(statements);
+
+                return new Response(JSON.stringify({ success: true }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
                 });
             }
 
