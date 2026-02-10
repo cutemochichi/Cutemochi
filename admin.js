@@ -14,8 +14,10 @@ function checkLogin() {
     if (!key) {
         document.getElementById('loginModal').classList.add('open');
     } else {
-        fetchProducts();
-        renderAdminList();
+
+        fetchProducts().then(() => {
+            renderAdminList();
+        });
     }
 }
 
@@ -40,7 +42,7 @@ async function login(e) {
         if (res.ok) {
             sessionStorage.setItem('adminKey', key);
             document.getElementById('loginModal').classList.remove('open');
-            fetchProducts();
+            await fetchProducts();
             renderAdminList();
         } else {
             err.style.display = 'block';
