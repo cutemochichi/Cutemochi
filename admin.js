@@ -451,6 +451,7 @@ async function saveProduct(e) {
         if (!res.ok) throw new Error("API Error");
 
         await fetchProducts(); // Reload all to get fresh ID/Sync
+        renderAdminList();
 
         closeModal();
     } catch (err) {
@@ -471,4 +472,4 @@ function closeModal() {
     document.getElementById('editModal').classList.remove('open');
 }
 
-// Export function removed (API is now used)
+

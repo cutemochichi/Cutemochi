@@ -16,14 +16,14 @@ const GOOGLE_FORM_ENTRY_IDS = {
 const GOOGLE_FORM_URL = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_ID}/formResponse`;
 
 // --- DATA ---
-// --- DATA ---
+
 // Products are fetched from the Cloudflare Worker API
 const API_URL = "https://newcute-api.cutesyfinds-shop.workers.dev"; // <--- PASTE YOUR WORKER URL HERE LATER
 let products = []; // Will be populated from API
 
 async function fetchProducts() {
-    if (!API_URL || API_URL === "YOUR_WORKER_URL_HERE") {
-        console.warn("API URL not set. Falling back to local/cached data if available.");
+    if (!API_URL) {
+        console.warn("API URL not set.");
         return;
     }
 

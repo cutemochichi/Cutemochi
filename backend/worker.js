@@ -9,7 +9,7 @@ export default {
         const corsHeaders = {
             'Access-Control-Allow-Origin': '*', // OR your specific domain: 'https://your-site.pages.dev'
             'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Key',
         };
 
         // Handle Pre-flight requests (OPTIONS)
