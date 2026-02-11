@@ -317,14 +317,13 @@ function editProduct(id) {
     document.getElementById('p_oldPrice').value = p.oldPrice || '';
     document.getElementById('p_img').value = p.img;
     document.getElementById('p_desc').value = p.desc || '';
-    document.getElementById('p_badge').value = p.badge || '';
+    // document.getElementById('p_badge').value = p.badge || ''; 
+    document.getElementById('p_bestSeller').checked = (p.badge === 'Best');
     document.getElementById('p_inStock').checked = (p.inStock !== false);
+    document.getElementById('p_images').value = (p.images && Array.isArray(p.images)) ? p.images.join(', ') : '';
 
     // Set Sizes
     document.getElementById('p_sizes').value = p.sizes ? p.sizes.join(', ') : '';
-
-    // Set Images
-    document.getElementById('p_images').value = p.images ? p.images.join(', ') : '';
 
     // Variants
     const vContainer = document.getElementById('variantsContainer');
@@ -558,7 +557,9 @@ async function saveProduct(e) {
     const oldPrice = document.getElementById('p_oldPrice').value ? parseInt(document.getElementById('p_oldPrice').value) : null;
     const img = document.getElementById('p_img').value;
     const desc = document.getElementById('p_desc').value;
-    const badge = document.getElementById('p_badge').value;
+    // const badge = document.getElementById('p_badge').value; // Removed manual input
+    const isBestSeller = document.getElementById('p_bestSeller').checked;
+    const badge = isBestSeller ? 'Best' : null;
     const inStock = document.getElementById('p_inStock').checked;
 
     const sizes = getCleanSizes();
@@ -626,7 +627,7 @@ async function saveProduct(e) {
         }
 
         // Optimistic UI Update (Update screen before waiting for server)
-        const btn = document.querySelector('#editModal .btn-success');
+        const btn = document.querySelector('#editModal button[type="submit"]');
         const oldText = btn.innerText;
         btn.innerText = "Saving...";
         btn.disabled = true;
@@ -653,7 +654,7 @@ async function saveProduct(e) {
     } catch (err) {
         alert("Error saving: " + err.message);
     } finally {
-        const btn = document.querySelector('#editModal .btn-success');
+        const btn = document.querySelector('#editModal button[type="submit"]');
         if (btn) {
             btn.innerText = "Save Product";
             btn.disabled = false;

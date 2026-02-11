@@ -27,12 +27,32 @@ async function fetchProducts() {
         return;
     }
 
+    // 1. Optimistic Load from Cache
+    const cached = localStorage.getItem('products_cache');
+    if (cached) {
+        try {
+            products = JSON.parse(cached);
+            renderProducts();
+            renderShop();
+            if (typeof renderAdminList === 'function') renderAdminList();
+            console.log("Loaded from cache");
+        } catch (e) {
+            console.warn("Cache parse error", e);
+        }
+    }
+
+    // 2. Network Fetch (Background)
     try {
         const res = await fetch(`${API_URL}/api/products`);
         if (!res.ok) throw new Error("Failed to fetch products");
-        products = await res.json();
 
-        // Re-render everything that depends on products
+        const freshData = await res.json();
+
+        // Only re-render if data changed (simple length check or deep compare)
+        // For now, just re-render to ensure fresh stock/prices
+        products = freshData;
+        localStorage.setItem('products_cache', JSON.stringify(products));
+
         renderProducts();
         renderShop();
 
@@ -42,7 +62,9 @@ async function fetchProducts() {
         }
     } catch (e) {
         console.error("Error loading products:", e);
-        showToast("Erreur de chargement des produits ⚠️");
+        if (products.length === 0) {
+            showToast("Erreur de chargement des produits ⚠️");
+        }
     }
 }
 
@@ -129,9 +151,11 @@ function reduceStock() {
 }
 
 // --- INIT ---
-window.onload = () => {
-    fetchProducts(); // <--- Fetch data on load
+// --- INIT ---
+// Start fetching immediately (don't wait for window.onload)
+fetchProducts();
 
+window.onload = () => {
     // Cache DOM Elements
     elements.heroSlider = document.getElementById('heroSlider');
     elements.homeGrid = document.getElementById('homeGrid');
@@ -152,7 +176,15 @@ window.onload = () => {
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('product')) {
-        openProduct(parseInt(urlParams.get('product')));
+        // If products are not loaded yet, wait for them
+        if (products.length === 0) {
+            // Poll for products or simple timeout retry
+            setTimeout(() => {
+                if (products.length > 0) openProduct(parseInt(urlParams.get('product')));
+            }, 500);
+        } else {
+            openProduct(parseInt(urlParams.get('product')));
+        }
     } else if (localStorage.getItem('lastView') === 'shop') {
         navigate('shop');
     } else {
@@ -161,8 +193,8 @@ window.onload = () => {
 
     renderHero();
     startSlider();
-    renderProducts();
-    renderShop();
+    // renderProducts(); // Called by fetchProducts now
+    // renderShop();    // Called by fetchProducts now
     renderCartList();
     updateCart();
     populateCities();
@@ -266,23 +298,21 @@ function createCard(p) {
 }
 
 function renderProducts() {
-    const container = elements.homeGrid;
-    if (!container) return;
+    if (!elements.homeGrid) return;
+    elements.homeGrid.innerHTML = '';
 
-    // Sort products: in-stock first
-    const sorted = sortProducts(products);
-    const fragment = document.createDocumentFragment();
+    // Filter only "Best" badge items for the Home Grid (Best Sellers)
+    let list = products.filter(p => p.badge === 'Best');
 
-    // Create temp container to parse HTML string (simplest migration without rewriting creatingCard to return nodes)
-    // Or just set innerHTML which is fast enough for small lists, but we can stick to innerHTML for simplicity 
-    // if we aren't creating nodes. 
-    // Actually, innerHTML on container is fine, but for "shop" with many items, batching string concat is better than loop appends.
-    // The current map(...).join('') IS efficient. 
-    // To truly optimize, we'd avoid innerHTML re-flow, but with map().join('') it's one reflow.
-    // So distinct DocumentFragment isn't strictly necessary unless we create DOM nodes. 
-    // I will keep map().join('') but ensure we use cached container.
+    // If no best sellers defined, fallback to first 4 items
+    if (list.length === 0) list = products.slice(0, 4);
 
-    container.innerHTML = sorted.slice(0, 4).map(createCard).join('');
+    // Apply Sort Logic (Stock + Custom Order)
+    list = sortProducts(list);
+
+    list.forEach(p => {
+        elements.homeGrid.innerHTML += createCard(p);
+    });
 }
 
 function renderShop() {
