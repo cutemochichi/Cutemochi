@@ -150,6 +150,43 @@ function getStock(id, variantIndex, size = null) {
     return 0; // Default out if not specified properly
 }
 
+function isProductEffectiveOutOfStock(p) {
+    // 1. Explicitly disabled by admin
+    if (p.inStock === false) return true;
+
+    // 2. Check actual stock levels (sum of all variants/sizes)
+    let totalStock = 0;
+
+    if (p.variants && p.variants.length > 0) {
+        // Sum all variants
+        p.variants.forEach(v => {
+            let vQty = 0;
+            if (typeof v.stock === 'number') {
+                vQty = v.stock;
+            } else if (typeof v.stock === 'object') {
+                vQty = Object.values(v.stock).reduce((a, b) => a + b, 0);
+            } else {
+                // simple 'true' or undefined fallback -> assume stock exists
+                vQty = 10;
+            }
+            totalStock += vQty;
+        });
+    } else {
+        // Simple product or no variants defined
+        if (typeof p.stock === 'number') {
+            totalStock = p.stock;
+        } else if (typeof p.stock === 'object') {
+            totalStock = Object.values(p.stock).reduce((a, b) => a + b, 0);
+        } else {
+            // Fallback logic matches getStock: if undefined -> 10
+            totalStock = (typeof p.stock !== 'undefined') ? p.stock : 10;
+        }
+    }
+
+    return totalStock <= 0;
+
+}
+
 function reduceStock() {
     // No-op. We do not reduce stock in this static version.
 }
@@ -284,19 +321,21 @@ function goBack() {
 
 // --- PRODUCT RENDERING ---
 function createCard(p) {
+    const isOutOfStock = isProductEffectiveOutOfStock(p);
+
     const priceDisplay = p.oldPrice > 0
         ? `<span class="price-sale">${p.price} DH</span> <s style="font-size:0.85em; opacity:0.5; font-weight:400;">${p.oldPrice}</s>`
         : `${p.price} DH`;
 
     let badgeHtml = '';
-    if (p.inStock === false) {
+    if (isOutOfStock) {
         badgeHtml = `<div class="tag-sale tag-out-of-stock">Rupture</div>`;
     } else if (p.badge) {
         badgeHtml = `<div class="tag-sale">${p.badge}</div>`;
     }
 
     return `
-    <div class="card ${p.inStock === false ? 'out-of-stock' : ''}" onclick="openProduct(${p.id})">
+    <div class="card ${isOutOfStock ? 'out-of-stock' : ''}" onclick="openProduct(${p.id})">
       <div class="card-img-box">
         ${badgeHtml}
         <img src="${p.img}" class="card-img" alt="${p.name}" loading="lazy" decoding="async" width="300" height="330">
@@ -350,11 +389,11 @@ function renderShop() {
 function sortProducts(list) {
     return [...list].sort((a, b) => {
         // 1. Stock Priority (In Stock first)
-        const aStock = (a.inStock !== false);
-        const bStock = (b.inStock !== false);
+        const aOutOfStock = isProductEffectiveOutOfStock(a);
+        const bOutOfStock = isProductEffectiveOutOfStock(b);
 
-        if (aStock !== bStock) {
-            return aStock ? -1 : 1; // true gets priority
+        if (aOutOfStock !== bOutOfStock) {
+            return aOutOfStock ? 1 : -1; // Out of stock (true) goes to bottom (1)
         }
 
         // 2. Custom Order (orderIndex)
