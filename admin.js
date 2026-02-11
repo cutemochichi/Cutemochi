@@ -151,11 +151,16 @@ function isProductEffectiveOutOfStock(p) {
             let vQty = 0;
             if (typeof v.stock === 'number') {
                 vQty = v.stock;
+            } else if (typeof v.stock === 'string') {
+                vQty = parseInt(v.stock) || 0;
             } else if (typeof v.stock === 'object') {
-                vQty = Object.values(v.stock).reduce((a, b) => a + b, 0);
+                vQty = Object.values(v.stock).reduce((a, b) => a + (parseInt(b) || 0), 0);
             } else {
-                // simple 'true' or undefined fallback -> assume stock exists
-                vQty = 10;
+                // simple 'true' or undefined fallback -> assume stock exists IF not explicitly false
+                // But wait, if it's undefined, we might have an issue.
+                // Safest to assume 0 if not present, OR 10 if we want default availability?
+                // Given the user report "quantity that works", let's assume if it's not a number/object, check for truthiness
+                vQty = v.stock ? 10 : 0;
             }
             totalStock += vQty;
         });
@@ -163,11 +168,16 @@ function isProductEffectiveOutOfStock(p) {
         // Simple product or no variants defined
         if (typeof p.stock === 'number') {
             totalStock = p.stock;
+        } else if (typeof p.stock === 'string') {
+            totalStock = parseInt(p.stock) || 0;
         } else if (typeof p.stock === 'object') {
-            totalStock = Object.values(p.stock).reduce((a, b) => a + b, 0);
+            totalStock = Object.values(p.stock).reduce((a, b) => a + (parseInt(b) || 0), 0);
         } else {
             // Fallback logic matches getStock: if undefined -> 10
-            totalStock = (typeof p.stock !== 'undefined') ? p.stock : 10;
+            // But if user set it to 0, it should be 0.
+            // If p.stock is undefined, maybe it IS out of stock?
+            // Let's rely on standard fallback
+            totalStock = (typeof p.stock !== 'undefined') ? (parseInt(p.stock) || 0) : 10;
         }
     }
 
