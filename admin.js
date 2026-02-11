@@ -106,9 +106,9 @@ function renderAdminList(list = products) {
             <div class="p-img-box">
                 <img src="${p.img}" class="p-img" loading="lazy">
                 ${p.badge ? `<span class="p-badge">${p.badge}</span>` : (p.isBestSeller ? `<span class="p-badge" style="background:linear-gradient(45deg, #FFD700, #FFA500);">Best Seller</span>` : '')}
-                <div class="toggle-stock ${p.inStock ? '' : 'off'}" onclick="toggleStock(${p.id}, ${!p.inStock})">
-                    <span class="material-symbols-rounded">${p.inStock ? 'check_circle' : 'cancel'}</span>
-                    ${p.inStock ? 'In Stock' : 'Out'}
+                <div class="toggle-stock ${isProductEffectiveOutOfStock(p) ? 'off' : ''}" onclick="toggleStock(${p.id}, ${!p.inStock})">
+                    <span class="material-symbols-rounded">${isProductEffectiveOutOfStock(p) ? 'cancel' : 'check_circle'}</span>
+                    ${isProductEffectiveOutOfStock(p) ? 'Out' : 'In Stock'}
                 </div>
             </div>
             <div class="p-info">
@@ -136,6 +136,42 @@ function filterProducts() {
     const term = document.getElementById('searchInput').value.toLowerCase();
     const filtered = products.filter(p => p.name.toLowerCase().includes(term) || p.cat.toLowerCase().includes(term));
     renderAdminList(filtered);
+}
+
+function isProductEffectiveOutOfStock(p) {
+    // 1. Explicitly disabled by admin
+    if (p.inStock === false) return true;
+
+    // 2. Check actual stock levels (sum of all variants/sizes)
+    let totalStock = 0;
+
+    if (p.variants && p.variants.length > 0) {
+        // Sum all variants
+        p.variants.forEach(v => {
+            let vQty = 0;
+            if (typeof v.stock === 'number') {
+                vQty = v.stock;
+            } else if (typeof v.stock === 'object') {
+                vQty = Object.values(v.stock).reduce((a, b) => a + b, 0);
+            } else {
+                // simple 'true' or undefined fallback -> assume stock exists
+                vQty = 10;
+            }
+            totalStock += vQty;
+        });
+    } else {
+        // Simple product or no variants defined
+        if (typeof p.stock === 'number') {
+            totalStock = p.stock;
+        } else if (typeof p.stock === 'object') {
+            totalStock = Object.values(p.stock).reduce((a, b) => a + b, 0);
+        } else {
+            // Fallback logic matches getStock: if undefined -> 10
+            totalStock = (typeof p.stock !== 'undefined') ? p.stock : 10;
+        }
+    }
+
+    return totalStock <= 0;
 }
 
 // --- TOGGLE STOCK ---
