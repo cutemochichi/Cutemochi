@@ -50,7 +50,8 @@ export default {
                     sizes: p.sizes ? JSON.parse(p.sizes) : undefined,
                     variants: p.variants ? JSON.parse(p.variants) : undefined,
                     images: p.images ? JSON.parse(p.images) : undefined,
-                    orderIndex: p.order_index || 0
+                    orderIndex: p.order_index || 0,
+                    isBestSeller: p.is_best_seller === 1
                 }));
 
                 return new Response(JSON.stringify(products), {
@@ -68,8 +69,8 @@ export default {
                 const newOrderIndex = (count || 0) + 1;
 
                 const stmt = env.DB.prepare(`
-          INSERT INTO products (name, cat, price, old_price, img, desc, badge, in_stock, sizes, variants, images, variant_style, require_variant_selection, order_index)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO products (name, cat, price, old_price, img, desc, badge, in_stock, sizes, variants, images, variant_style, require_variant_selection, order_index, is_best_seller)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
 
                 await stmt.bind(
@@ -86,7 +87,10 @@ export default {
                     data.images ? JSON.stringify(data.images) : null,
                     data.variantStyle || null,
                     data.requireVariantSelection ? 1 : 0,
-                    newOrderIndex
+                    data.variantStyle || null,
+                    data.requireVariantSelection ? 1 : 0,
+                    newOrderIndex,
+                    data.isBestSeller ? 1 : 0
                 ).run();
 
                 return new Response(JSON.stringify({ success: true }), {
@@ -104,7 +108,7 @@ export default {
                 const stmt = env.DB.prepare(`
           UPDATE products SET 
             name = ?, cat = ?, price = ?, old_price = ?, img = ?, desc = ?, badge = ?, in_stock = ?, 
-            sizes = ?, variants = ?, images = ?, variant_style = ?, require_variant_selection = ?
+            sizes = ?, variants = ?, images = ?, variant_style = ?, require_variant_selection = ?, is_best_seller = ?
           WHERE id = ?
         `);
 
@@ -121,7 +125,9 @@ export default {
                     data.variants ? JSON.stringify(data.variants) : null,
                     data.images ? JSON.stringify(data.images) : null,
                     data.variantStyle || null,
+                    data.variantStyle || null,
                     data.requireVariantSelection ? 1 : 0,
+                    data.isBestSeller ? 1 : 0,
                     id
                 ).run();
 
