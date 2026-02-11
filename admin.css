@@ -804,3 +804,10 @@ button {
 .btn-delete-variant span {
     font-size: 18px;
 }
+
+/* Color Actions Wrapper */
+.color-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

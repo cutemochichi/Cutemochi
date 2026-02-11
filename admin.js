@@ -492,24 +492,34 @@ function addVariantField(vData = null, sizesOverride = null) {
         </div>
 
         <div class="v-group">
-            <label>Color (Opt)</label>
+            <label>Color / Hex</label>
             
             <!-- Hidden Input to store actual value sent to DB -->
             <input type="hidden" class="v-hex-value" value="${hasColor ? hex : 'transparent'}">
 
-            <!-- UI: Color Active State -->
-            <div class="v-color-row ${hasColor ? '' : 'hidden'}" id="colorActiveState">
-                <input type="color" class="v-color-input" value="${displayHex}" oninput="updateColorValue(this)">
-                <button type="button" class="btn-remove-color" onclick="toggleColorState(this, false)" title="Remove Color">
-                    <span class="material-symbols-rounded" style="font-size:16px;">close</span>
-                </button>
-            </div>
+            <div class="v-color-row">
+                <!-- Persistent Text Input -->
+                <input type="text" class="v-hex-text" 
+                       value="${hasColor ? hex : ''}" 
+                       placeholder="#RRGGBB" 
+                       oninput="handleHexInput(this)"
+                       maxlength="7">
 
-            <!-- UI: No Color State -->
-            <div class="v-color-row ${!hasColor ? '' : 'hidden'}" id="noColorState">
-                <button type="button" class="btn-add-color" onclick="toggleColorState(this, true)">
-                    <span class="material-symbols-rounded" style="font-size:16px;">palette</span> Add Color
-                </button>
+                <!-- Color Picker (Hidden if transparent, but we can toggle visibility) -->
+                <!-- We wrap picker and remove button -->
+                <div class="color-actions ${hasColor ? '' : 'hidden'}" id="activeColorUI">
+                     <input type="color" class="v-color-input" value="${displayHex}" oninput="handlePickerInput(this)">
+                     <button type="button" class="btn-remove-color" onclick="forceRemoveColor(this)" title="Remove Color">
+                        <span class="material-symbols-rounded" style="font-size:16px;">close</span>
+                     </button>
+                </div>
+
+                <!-- Empty State Action -->
+                <div class="color-actions ${!hasColor ? '' : 'hidden'}" id="emptyColorUI">
+                     <button type="button" class="btn-add-color" onclick="forceAddColor(this)" title="Open Picker" style="padding:0 12px; height:42px;">
+                        <span class="material-symbols-rounded" style="font-size:16px;">palette</span>
+                     </button>
+                </div>
             </div>
         </div>
 
@@ -521,29 +531,102 @@ function addVariantField(vData = null, sizesOverride = null) {
     toggleSimpleStockInput();
 }
 
-// Helper to toggle color state
-function toggleColorState(btn, enable) {
-    const parent = btn.closest('.v-group');
-    const hiddenInput = parent.querySelector('.v-hex-value');
-    const activeState = parent.querySelector('#colorActiveState');
-    const noColorState = parent.querySelector('#noColorState');
-    const colorInput = activeState.querySelector('input[type="color"]');
+// --- NEW COLOR HANDLERS ---
 
-    if (enable) {
-        hiddenInput.value = colorInput.value; // Set to picker value
-        activeState.classList.remove('hidden');
-        noColorState.classList.add('hidden');
-    } else {
-        hiddenInput.value = 'transparent'; // Set to transparent
-        activeState.classList.add('hidden');
-        noColorState.classList.remove('hidden');
+function handleHexInput(input) {
+    const parent = input.closest('.v-color-row');
+    const activeUI = parent.querySelector('#activeColorUI');
+    const emptyUI = parent.querySelector('#emptyColorUI');
+    const hiddenVal = input.closest('.v-group').querySelector('.v-hex-value');
+    const picker = activeUI.querySelector('.v-color-input');
+
+    let val = input.value.trim();
+
+    // Auto-formatting (add #)
+    if (val.length > 0 && !val.startsWith('#')) {
+        // Don't force it immediately while typing if it messes up cursor?
+        // Actually, let's just prepend logic check
+        // We won't modify input.value automatically to avoid annoying user, 
+        // OR we modifiers ONLY if it looks like a hex char being typed.
+    }
+
+    if (val === '') {
+        // If cleared: keep UI but set hidden to transparent?
+        // Actually, if completely clear, maybe revert to No Color state IF user blurs?
+        // For now, let's just update hidden to transparent if empty.
+        hiddenVal.value = 'transparent';
+        return;
+    }
+
+    let checkVal = val.startsWith('#') ? val : '#' + val;
+
+    // Check if full valid hex (3 or 6 chars)
+    if (/^#([0-9A-F]{3}){1,2}$/i.test(checkVal)) {
+        // Valid Color!
+        // 1. Activate UI
+        activeUI.classList.remove('hidden');
+        emptyUI.classList.add('hidden');
+
+        // 2. Normalize
+        if (checkVal.length === 4) {
+            checkVal = '#' + checkVal[1] + checkVal[1] + checkVal[2] + checkVal[2] + checkVal[3] + checkVal[3];
+        }
+
+        // 3. Sync
+        picker.value = checkVal;
+        hiddenVal.value = checkVal;
     }
 }
 
-function updateColorValue(input) {
-    const parent = input.closest('.v-group');
-    const hiddenInput = parent.querySelector('.v-hex-value');
-    hiddenInput.value = input.value;
+function handlePickerInput(picker) {
+    const parent = picker.closest('.v-color-row');
+    const textInput = parent.querySelector('.v-hex-text');
+    const hiddenVal = picker.closest('.v-group').querySelector('.v-hex-value');
+
+    textInput.value = picker.value;
+    hiddenVal.value = picker.value;
+}
+
+function forceAddColor(btn) {
+    const parent = btn.closest('.v-color-row');
+    const activeUI = parent.querySelector('#activeColorUI');
+    const emptyUI = parent.querySelector('#emptyColorUI');
+    const textInput = parent.querySelector('.v-hex-text');
+    const picker = activeUI.querySelector('.v-color-input');
+    const hiddenVal = btn.closest('.v-group').querySelector('.v-hex-value');
+
+    // Default black/white?
+    // Picker defaults to black if not set.
+    const def = '#000000';
+
+    activeUI.classList.remove('hidden');
+    emptyUI.classList.add('hidden');
+
+    if (!textInput.value) {
+        textInput.value = def;
+        picker.value = def;
+        hiddenVal.value = def;
+    } else {
+        // If text input had junk, maybe clear it or keep it?
+        // If text input was empty, set def.
+    }
+
+    // Open picker?
+    // picker.click(); // Browsers often block this unless trusted event.
+}
+
+function forceRemoveColor(btn) {
+    const parent = btn.closest('.v-color-row');
+    const activeUI = parent.querySelector('#activeColorUI');
+    const emptyUI = parent.querySelector('#emptyColorUI');
+    const textInput = parent.querySelector('.v-hex-text');
+    const hiddenVal = btn.closest('.v-group').querySelector('.v-hex-value');
+
+    activeUI.classList.add('hidden');
+    emptyUI.classList.remove('hidden');
+
+    textInput.value = '';
+    hiddenVal.value = 'transparent';
 }
 
 // --- SAVE ---
