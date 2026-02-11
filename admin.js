@@ -105,7 +105,7 @@ function renderAdminList(list = products) {
         div.innerHTML = `
             <div class="p-img-box">
                 <img src="${p.img}" class="p-img" loading="lazy">
-                ${p.badge ? `<span class="p-badge">${p.badge}</span>` : ''}
+                ${p.badge ? `<span class="p-badge">${p.badge}</span>` : (p.isBestSeller ? `<span class="p-badge" style="background:linear-gradient(45deg, #FFD700, #FFA500);">Best Seller</span>` : '')}
                 <div class="toggle-stock ${p.inStock ? '' : 'off'}" onclick="toggleStock(${p.id}, ${!p.inStock})">
                     <span class="material-symbols-rounded">${p.inStock ? 'check_circle' : 'cancel'}</span>
                     ${p.inStock ? 'In Stock' : 'Out'}
@@ -317,8 +317,9 @@ function editProduct(id) {
     document.getElementById('p_oldPrice').value = p.oldPrice || '';
     document.getElementById('p_img').value = p.img;
     document.getElementById('p_desc').value = p.desc || '';
+    document.getElementById('p_desc').value = p.desc || '';
     document.getElementById('p_badge').value = p.badge || '';
-    document.getElementById('p_bestSeller').checked = (p.badge === 'Best' || p.badge === 'Best Seller');
+    document.getElementById('p_bestSeller').checked = (p.isBestSeller === true);
     document.getElementById('p_inStock').checked = (p.inStock !== false);
     document.getElementById('p_images').value = (p.images && Array.isArray(p.images)) ? p.images.join(', ') : '';
 
@@ -700,7 +701,8 @@ async function saveProduct(e) {
             ? document.getElementById('p_images').value.split(',').map(s => s.trim()).filter(s => s !== '')
             : null,
         variantStyle: editingId ? products.find(p => p.id === editingId).variantStyle : null,
-        requireVariantSelection: editingId ? products.find(p => p.id === editingId).requireVariantSelection : false
+        requireVariantSelection: editingId ? products.find(p => p.id === editingId).requireVariantSelection : false,
+        isBestSeller: isBestSeller
     };
 
     try {
