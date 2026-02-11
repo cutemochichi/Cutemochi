@@ -648,7 +648,7 @@ async function saveProduct(e) {
         if (!res.ok) throw new Error("API Error");
 
         await fetchProducts(); // Reload all to get fresh ID/Sync
-        renderAdminList();
+        // renderAdminList(); // fetchProducts already calls this if function exists
 
         closeModal();
     } catch (err) {

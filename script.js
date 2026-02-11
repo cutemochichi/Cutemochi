@@ -43,18 +43,22 @@ async function fetchProducts() {
 
     // 2. Network Fetch (Background)
     try {
-        const res = await fetch(`${API_URL}/api/products`);
+        // Add timestamp to prevent browser caching of the JSON response
+        const res = await fetch(`${API_URL}/api/products?t=${Date.now()}`);
         if (!res.ok) throw new Error("Failed to fetch products");
 
         const freshData = await res.json();
 
-        // Only re-render if data changed (simple length check or deep compare)
-        // For now, just re-render to ensure fresh stock/prices
+        // Update Products & Cache
         products = freshData;
         localStorage.setItem('products_cache', JSON.stringify(products));
 
         renderProducts();
         renderShop();
+
+        // CRITICAL: Update cart totals in case prices changed
+        updateCart();
+        renderCartList();
 
         // If on admin page, render admin list
         if (typeof renderAdminList === 'function') {
@@ -152,10 +156,15 @@ function reduceStock() {
 
 // --- INIT ---
 // --- INIT ---
-// Start fetching immediately (don't wait for window.onload)
+// Start fetching immediately
 fetchProducts();
 
-window.onload = () => {
+// Use DOMContentLoaded for faster execution than window.onload (which waits for images)
+document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+});
+
+function initApp() {
     // Cache DOM Elements
     elements.heroSlider = document.getElementById('heroSlider');
     elements.homeGrid = document.getElementById('homeGrid');
@@ -195,10 +204,11 @@ window.onload = () => {
     startSlider();
     // renderProducts(); // Called by fetchProducts now
     // renderShop();    // Called by fetchProducts now
+    renderShop(); // Ensure shop is rendered once DOM is ready
     renderCartList();
     updateCart();
     populateCities();
-};
+}
 
 // --- SLIDER LOGIC ---
 function renderHero() {
@@ -298,8 +308,11 @@ function createCard(p) {
 }
 
 function renderProducts() {
-    if (!elements.homeGrid) return;
-    elements.homeGrid.innerHTML = '';
+    // Robust check: Use cached element OR query directly
+    const container = elements.homeGrid || document.getElementById('homeGrid');
+    if (!container) return; // DOM truly not ready
+
+    container.innerHTML = '';
 
     // Filter only "Best" badge items for the Home Grid (Best Sellers)
     let list = products.filter(p => p.badge === 'Best');
@@ -311,12 +324,12 @@ function renderProducts() {
     list = sortProducts(list);
 
     list.forEach(p => {
-        elements.homeGrid.innerHTML += createCard(p);
+        container.innerHTML += createCard(p);
     });
 }
 
 function renderShop() {
-    const container = elements.shopGrid;
+    const container = elements.shopGrid || document.getElementById('shopGrid');
     if (!container) return;
 
     let filtered = products;
