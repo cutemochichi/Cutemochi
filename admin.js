@@ -367,6 +367,7 @@ function editProduct(id) {
     document.getElementById('p_badge').value = p.badge || '';
     document.getElementById('p_bestSeller').checked = (p.isBestSeller === true);
     document.getElementById('p_inStock').checked = (p.inStock !== false);
+    document.getElementById('p_variantStyle').value = p.variantStyle || 'color'; // Load style
     document.getElementById('p_images').value = (p.images && Array.isArray(p.images)) ? p.images.join(', ') : '';
 
     // Set Sizes
@@ -553,9 +554,12 @@ function addVariantField(vData = null, sizesOverride = null) {
                        maxlength="7">
 
                 <!-- Color Picker (Hidden if transparent, but we can toggle visibility) -->
-                <!-- We wrap picker and remove button -->
-                <div class="color-actions ${hasColor ? '' : 'hidden'}" id="activeColorUI">
-                     <input type="color" class="v-color-input" value="${displayHex}" oninput="handlePickerInput(this)">
+                <div class="color-actions ${hasColor ? '' : 'hidden'}" id="activeColorUI" style="display:flex; align-items:center; gap:8px;">
+                     <!-- Circular Swatch Wrapper -->
+                     <div class="color-swatch-wrapper" style="background-color: ${displayHex};">
+                        <input type="color" class="v-color-input" value="${displayHex}" oninput="handlePickerInput(this)">
+                     </div>
+                     
                      <button type="button" class="btn-remove-color" onclick="forceRemoveColor(this)" title="Remove Color">
                         <span class="material-symbols-rounded" style="font-size:16px;">close</span>
                      </button>
@@ -586,21 +590,11 @@ function handleHexInput(input) {
     const emptyUI = parent.querySelector('#emptyColorUI');
     const hiddenVal = input.closest('.v-group').querySelector('.v-hex-value');
     const picker = activeUI.querySelector('.v-color-input');
+    const swatch = activeUI.querySelector('.color-swatch-wrapper');
 
     let val = input.value.trim();
 
-    // Auto-formatting (add #)
-    if (val.length > 0 && !val.startsWith('#')) {
-        // Don't force it immediately while typing if it messes up cursor?
-        // Actually, let's just prepend logic check
-        // We won't modify input.value automatically to avoid annoying user, 
-        // OR we modifiers ONLY if it looks like a hex char being typed.
-    }
-
     if (val === '') {
-        // If cleared: keep UI but set hidden to transparent?
-        // Actually, if completely clear, maybe revert to No Color state IF user blurs?
-        // For now, let's just update hidden to transparent if empty.
         hiddenVal.value = 'transparent';
         return;
     }
@@ -610,18 +604,18 @@ function handleHexInput(input) {
     // Check if full valid hex (3 or 6 chars)
     if (/^#([0-9A-F]{3}){1,2}$/i.test(checkVal)) {
         // Valid Color!
-        // 1. Activate UI
         activeUI.classList.remove('hidden');
         emptyUI.classList.add('hidden');
 
-        // 2. Normalize
+        // Normalize
         if (checkVal.length === 4) {
             checkVal = '#' + checkVal[1] + checkVal[1] + checkVal[2] + checkVal[2] + checkVal[3] + checkVal[3];
         }
 
-        // 3. Sync
+        // Sync
         picker.value = checkVal;
         hiddenVal.value = checkVal;
+        swatch.style.backgroundColor = checkVal;
     }
 }
 
@@ -629,9 +623,11 @@ function handlePickerInput(picker) {
     const parent = picker.closest('.v-color-row');
     const textInput = parent.querySelector('.v-hex-text');
     const hiddenVal = picker.closest('.v-group').querySelector('.v-hex-value');
+    const swatch = picker.closest('.color-swatch-wrapper');
 
     textInput.value = picker.value;
     hiddenVal.value = picker.value;
+    swatch.style.backgroundColor = picker.value;
 }
 
 function forceAddColor(btn) {
@@ -641,9 +637,8 @@ function forceAddColor(btn) {
     const textInput = parent.querySelector('.v-hex-text');
     const picker = activeUI.querySelector('.v-color-input');
     const hiddenVal = btn.closest('.v-group').querySelector('.v-hex-value');
+    const swatch = activeUI.querySelector('.color-swatch-wrapper');
 
-    // Default black/white?
-    // Picker defaults to black if not set.
     const def = '#000000';
 
     activeUI.classList.remove('hidden');
@@ -653,13 +648,8 @@ function forceAddColor(btn) {
         textInput.value = def;
         picker.value = def;
         hiddenVal.value = def;
-    } else {
-        // If text input had junk, maybe clear it or keep it?
-        // If text input was empty, set def.
+        swatch.style.backgroundColor = def;
     }
-
-    // Open picker?
-    // picker.click(); // Browsers often block this unless trusted event.
 }
 
 function forceRemoveColor(btn) {
@@ -687,6 +677,7 @@ async function saveProduct(e) {
     const oldPrice = document.getElementById('p_oldPrice').value ? parseInt(document.getElementById('p_oldPrice').value) : null;
     const img = document.getElementById('p_img').value;
     const desc = document.getElementById('p_desc').value;
+    const variantStyle = document.getElementById('p_variantStyle').value; // Get variant style
     let badge = document.getElementById('p_badge').value;
     const isBestSeller = document.getElementById('p_bestSeller').checked;
 
@@ -746,7 +737,7 @@ async function saveProduct(e) {
         images: document.getElementById('p_images').value.split(',').map(s => s.trim()).filter(s => s !== '').length > 0
             ? document.getElementById('p_images').value.split(',').map(s => s.trim()).filter(s => s !== '')
             : null,
-        variantStyle: editingId ? products.find(p => p.id === editingId).variantStyle : null,
+        variantStyle: variantStyle, // Save style
         requireVariantSelection: editingId ? products.find(p => p.id === editingId).requireVariantSelection : false,
         isBestSeller: isBestSeller
     };
