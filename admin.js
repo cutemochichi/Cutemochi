@@ -317,8 +317,8 @@ function editProduct(id) {
     document.getElementById('p_oldPrice').value = p.oldPrice || '';
     document.getElementById('p_img').value = p.img;
     document.getElementById('p_desc').value = p.desc || '';
-    // document.getElementById('p_badge').value = p.badge || ''; 
-    document.getElementById('p_bestSeller').checked = (p.badge === 'Best');
+    document.getElementById('p_badge').value = p.badge || '';
+    document.getElementById('p_bestSeller').checked = (p.badge === 'Best' || p.badge === 'Best Seller');
     document.getElementById('p_inStock').checked = (p.inStock !== false);
     document.getElementById('p_images').value = (p.images && Array.isArray(p.images)) ? p.images.join(', ') : '';
 
@@ -640,9 +640,12 @@ async function saveProduct(e) {
     const oldPrice = document.getElementById('p_oldPrice').value ? parseInt(document.getElementById('p_oldPrice').value) : null;
     const img = document.getElementById('p_img').value;
     const desc = document.getElementById('p_desc').value;
-    // const badge = document.getElementById('p_badge').value; // Removed manual input
+    let badge = document.getElementById('p_badge').value;
     const isBestSeller = document.getElementById('p_bestSeller').checked;
-    const badge = isBestSeller ? 'Best' : null;
+
+    if (!badge) {
+        badge = null;
+    }
     const inStock = document.getElementById('p_inStock').checked;
 
     const sizes = getCleanSizes();
