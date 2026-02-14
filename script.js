@@ -192,7 +192,6 @@ function reduceStock() {
 }
 
 // --- INIT ---
-// --- INIT ---
 // Start fetching immediately
 fetchProducts();
 
@@ -202,8 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
-    // Cache DOM Elements
     elements.heroSlider = document.getElementById('heroSlider');
+    elements.heroDots = document.getElementById('heroDots');
     elements.homeGrid = document.getElementById('homeGrid');
     elements.shopGrid = document.getElementById('shopGrid');
     elements.cartBadge = document.getElementById('cartBadge');
@@ -238,9 +237,8 @@ function initApp() {
     }
 
     renderHero();
+    renderHeroDots();
     startSlider();
-    // renderProducts(); // Called by fetchProducts now
-    // renderShop();    // Called by fetchProducts now
     renderShop(); // Ensure shop is rendered once DOM is ready
     renderCartList();
     updateCart();
@@ -265,15 +263,46 @@ function renderHero() {
   `).join('');
 }
 
+let heroInterval = null;
+let heroCurrentSlide = 0;
+
 function startSlider() {
     const slides = document.querySelectorAll('.slide');
     if (slides.length < 2) return;
-    let current = 0;
-    setInterval(() => {
-        slides[current].classList.remove('active');
-        current = (current + 1) % slides.length;
-        slides[current].classList.add('active');
+    heroCurrentSlide = 0;
+    if (heroInterval) clearInterval(heroInterval);
+    heroInterval = setInterval(() => {
+        slides[heroCurrentSlide].classList.remove('active');
+        heroCurrentSlide = (heroCurrentSlide + 1) % slides.length;
+        slides[heroCurrentSlide].classList.add('active');
+        updateHeroDots(heroCurrentSlide);
     }, 5000);
+}
+
+function renderHeroDots() {
+    const dotsContainer = elements.heroDots;
+    if (!dotsContainer) return;
+    dotsContainer.innerHTML = heroSlides.map((_, i) =>
+        `<button class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" aria-label="Slide ${i + 1}"></button>`
+    ).join('');
+}
+
+function updateHeroDots(activeIndex) {
+    document.querySelectorAll('.hero-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === activeIndex);
+    });
+}
+
+function goToSlide(index) {
+    const slides = document.querySelectorAll('.slide');
+    slides.forEach(s => s.classList.remove('active'));
+    if (slides[index]) slides[index].classList.add('active');
+    heroCurrentSlide = index;
+    updateHeroDots(index);
+    // Reset auto-timer so clicking a dot doesn't fight the interval
+    if (heroInterval) clearInterval(heroInterval);
+    startSlider();
+    heroCurrentSlide = index; // Restore after startSlider resets to 0
 }
 
 // --- NAVIGATION ---
@@ -288,9 +317,8 @@ function navigate(viewId, push = true) {
 
     const target = document.getElementById(`view-${viewId}`);
     if (target) {
-        // Optimize: verify classList toggle efficiency
         target.classList.add('active');
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
@@ -347,11 +375,8 @@ function createCard(p) {
 }
 
 function renderProducts() {
-    // Robust check: Use cached element OR query directly
     const container = elements.homeGrid || document.getElementById('homeGrid');
-    if (!container) return; // DOM truly not ready
-
-    container.innerHTML = '';
+    if (!container) return;
 
     // Filter only "Best" badge items for the Home Grid (Best Sellers)
     let list = products.filter(p => p.badge === 'Best');
@@ -362,9 +387,8 @@ function renderProducts() {
     // Apply Sort Logic (Stock + Custom Order)
     list = sortProducts(list);
 
-    list.forEach(p => {
-        container.innerHTML += createCard(p);
-    });
+    // Single DOM write instead of N innerHTML += (prevents N reflows)
+    container.innerHTML = list.map(createCard).join('');
 }
 
 function renderShop() {
@@ -551,8 +575,8 @@ function renderPDP(p) {
 
     if (p.sizes) {
         sizeHtml = `
-        <label style="font-weight:700; display:block; margin-bottom:12px; margin-top:24px;">
-            Taille: <span style="font-weight:400; color:var(--color-primary);">${activeSize || 'Sélectionner'}</span>
+        <label class="pdp-option-label" style="margin-top:24px;">
+            Taille: <span>${activeSize || 'Sélectionner'}</span>
         </label>
         <div class="size-group">
             ${p.sizes.map(size => {
@@ -610,8 +634,11 @@ function renderPDP(p) {
     }
 
     if (variantStock > 0 && variantStock <= 3) {
-        btnHtml = `<div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-            <div style="color:#d32f2f; font-weight:700;">⚠️ Plus que ${variantStock} en stock !</div>
+        btnHtml = `<div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+            <div class="low-stock-alert">
+                <span class="low-stock-dot"></span>
+                Plus que ${variantStock} en stock !
+            </div>
             ${btnHtml}
          </div>`;
     }
@@ -631,18 +658,33 @@ function renderPDP(p) {
          <span class="pdp-tag">${p.cat.toUpperCase()}</span>
        </div>
        ${priceHtml}
-       <p style="font-size:1.1rem; color:var(--text-gray); margin-bottom:30px; line-height:1.7;">${p.desc}</p>
+       <p class="pdp-desc">${p.desc}</p>
        
        ${(p.variants && p.variants.length > 0 && p.variants[0].name !== 'Standard') ? `
-       <label style="font-weight:700; display:block; margin-bottom:12px;">
-         ${p.variantStyle === 'button' ? 'Modèle' : 'Couleur'}: <span style="font-weight:400; color:var(--color-primary);">${currentVariant.name}</span>
+       <label class="pdp-option-label">
+         ${p.variantStyle === 'button' ? 'Modèle' : 'Couleur'}: <span>${currentVariant.name}</span>
        </label>` : ''}
        ${(p.variants && p.variants.length > 0 && p.variants[0].name !== 'Standard') ? variantsHtml : ''}
        
        ${sizeHtml}
        
-       <div style="display:flex; gap:16px; margin-top:32px;">
+       <div class="pdp-actions">
          ${btnHtml}
+       </div>
+
+       <div class="pdp-trust">
+         <div class="trust-item">
+           <span class="material-symbols-rounded">local_shipping</span>
+           Livraison rapide
+         </div>
+         <div class="trust-item">
+           <span class="material-symbols-rounded">verified</span>
+           Qualité garantie
+         </div>
+         <div class="trust-item">
+           <span class="material-symbols-rounded">payments</span>
+           Paiement à la livraison
+         </div>
        </div>
     </div>
   `;
@@ -743,6 +785,15 @@ function updateCart() {
 
     if (elements.cartBadge) elements.cartBadge.classList.toggle('visible', count > 0);
     if (elements.mobBadge) elements.mobBadge.classList.toggle('visible', count > 0);
+
+    // Pulse animation on badge
+    [elements.cartBadge, elements.mobBadge].forEach(badge => {
+        if (badge && count > 0) {
+            badge.classList.remove('pulse');
+            void badge.offsetWidth; // force reflow
+            badge.classList.add('pulse');
+        }
+    });
 }
 
 // --- DRAWER ---
@@ -759,10 +810,12 @@ function closeDrawers() {
 
 function renderCartList() {
     const list = elements.cartList;
+    if (!list) return;
     if (cart.length === 0) {
         list.innerHTML = `<div style="text-align:center; margin-top:60px; color:#ccc;">
-      <span class="material-symbols-rounded" style="font-size:64px; margin-bottom:16px;">shopping_bag</span>
-      <p>Your bag is empty.</p>
+      <span class="material-symbols-rounded" style="font-size:64px; margin-bottom:16px; display:block;">shopping_bag</span>
+      <p style="font-size:1.1rem; font-weight:600;">Votre panier est vide</p>
+      <p style="font-size:0.9rem; margin-top:8px; color:#bbb;">Ajoutez des articles pour commencer !</p>
     </div>`;
         if (elements.drawerTotal) elements.drawerTotal.innerText = '0 DH';
         const btn = elements.checkoutBtn;
@@ -790,25 +843,29 @@ function renderCartList() {
 
         const variant = (p.variants && p.variants.length > 0) ? p.variants[item.variantIndex] : { name: "", hex: "transparent", img: p.img };
         const displayImg = variant.img || p.img;
-        const sizeLabel = item.size ? ` - ${item.size} ` : '';
+        const sizeLabel = item.size ? ` · ${item.size}` : '';
+        const variantLabel = variant.name ? `${variant.name}${sizeLabel}` : sizeLabel;
 
         total += p.price * item.qty;
         return `
       <div class="cart-item">
         <div style="position:relative;">
-            <img src="${displayImg}" class="cart-img">
-            ${variant.hex !== "transparent" ? `<div style="position:absolute; bottom:0; right:0; background:${variant.hex}; width:16px; height:16px; border-radius:50%; border:1px solid #fff;"></div>` : ''}
+            <img src="${displayImg}" class="cart-img" alt="${p.name}">
+            ${variant.hex !== "transparent" ? `<div style="position:absolute; bottom:-2px; right:-2px; background:${variant.hex}; width:18px; height:18px; border-radius:50%; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.15);"></div>` : ''}
         </div>
-        <div style="flex:1;">
-          <h4 style="margin-bottom:4px;">${p.name}</h4>
-          <div style="font-size:0.8rem; color:var(--text-gray); margin-bottom:4px;">${variant.name}${sizeLabel}</div>
-          <div style="color:var(--text-gray); font-size:0.9rem;">${p.price} DH</div>
+        <div style="flex:1; min-width:0;">
+          <h4 style="margin-bottom:4px; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</h4>
+          ${variantLabel ? `<div style="font-size:0.8rem; color:var(--text-gray); margin-bottom:4px;">${variantLabel}</div>` : ''}
+          <div style="color:var(--color-primary); font-weight:700; font-size:0.95rem;">${p.price} DH</div>
         </div>
         <div class="qty-ctrl">
-           <span onclick="updateQty(${index}, -1)" style="cursor:pointer; padding:0 8px;">-</span>
-           <span>${item.qty}</span>
-           <span onclick="updateQty(${index}, 1)" style="cursor:pointer; padding:0 8px;">+</span>
+           <span onclick="updateQty(${index}, -1)">−</span>
+           <span style="min-width:20px; text-align:center;">${item.qty}</span>
+           <span onclick="updateQty(${index}, 1)">+</span>
         </div>
+        <button class="cart-item-remove" onclick="removeFromCart(${index})" title="Supprimer">
+          <span class="material-symbols-rounded" style="font-size:18px;">delete</span>
+        </button>
       </div>
     `;
     }).join('');
@@ -837,8 +894,8 @@ function renderCheckoutItems() {
         return `
             <div style="display:flex; gap:16px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px dashed #eee; align-items:center;">
                 <div style="position:relative; flex-shrink:0;">
-                    <img src="${displayImg}" style="width:60px; height:60px; border-radius:12px; object-fit:cover; background:#f4f4f6;">
-                    <div style="position:absolute; -top:6px; -right:6px; background:var(--text-dark); color:white; width:22px; height:22px; border-radius:50%; font-size:0.8rem; display:flex; align-items:center; justify-content:center; border:2px solid white; font-weight:700;">${item.qty}</div>
+                    <img src="${displayImg}" style="width:60px; height:60px; border-radius:12px; object-fit:cover; background:#f4f4f6;" loading="lazy">
+                    <div style="position:absolute; top:-6px; right:-6px; background:var(--text-dark); color:white; width:22px; height:22px; border-radius:50%; font-size:0.8rem; display:flex; align-items:center; justify-content:center; border:2px solid white; font-weight:700;">${item.qty}</div>
                 </div>
                 <div style="flex:1;">
                    <div style="font-weight:700; font-size:1rem; margin-bottom:4px;">${p.name}</div>
@@ -1037,14 +1094,21 @@ async function submitOrder(event) {
 }
 
 // --- UTILS ---
+let toastTimer = null;
 function showToast(msg) {
     const t = elements.toast;
     const tMsg = elements.toastMsg;
     if (!t || !tMsg) return;
 
+    // Clear any existing toast to prevent stacking
+    if (toastTimer) clearTimeout(toastTimer);
+    t.classList.remove('active');
+
+    // Force reflow then show new toast
+    void t.offsetWidth;
     tMsg.innerText = msg;
     t.classList.add('active');
-    setTimeout(() => t.classList.remove('active'), 3000);
+    toastTimer = setTimeout(() => t.classList.remove('active'), 3000);
 }
 
 // Cities Data

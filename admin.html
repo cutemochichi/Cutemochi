@@ -7,7 +7,7 @@
     <title>Cutesy Finds | HQ</title>
     <!-- Fonts -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&family=Quicksand:wght@600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <!-- Icons -->
     <link rel="stylesheet"
@@ -30,15 +30,16 @@
         <div class="admin-header">
             <div class="brand">
                 <span class="material-symbols-rounded">stars</span>
-                HQ Dashboard
+                Cutesy HQ
+                <span class="admin-tag">Admin</span>
             </div>
             <div class="header-actions">
-                <a href="index.html" class="stat-pill" style="text-decoration:none; background:white;">
-                    <span class="material-symbols-rounded">storefront</span>
-                    <span class="btn-text">Shop</span>
+                <a href="index.html" class="btn-header-secondary" style="text-decoration:none;">
+                    <span class="material-symbols-rounded" style="font-size:20px;">storefront</span>
+                    <span class="btn-text">View Shop</span>
                 </a>
-                <button class="stat-pill" onclick="logout()" style="background:#ffebee; color:#d32f2f;">
-                    <span class="material-symbols-rounded">logout</span>
+                <button class="btn-header-secondary" onclick="logout()" style="color:#ef4444;">
+                    <span class="material-symbols-rounded" style="font-size:20px;">logout</span>
                 </button>
             </div>
         </div>
@@ -48,12 +49,20 @@
         <!-- STATS & SEARCH -->
         <div class="dashboard-controls">
             <div class="search-bar">
-                <span class="material-symbols-rounded" style="color:var(--text-gray);">search</span>
+                <span class="material-symbols-rounded">search</span>
                 <input id="searchInput" placeholder="Search products..." onkeyup="filterProducts()">
             </div>
             <div class="stat-pill">
-                <span class="material-symbols-rounded">inventory_2</span>
-                <span id="totalProducts">0</span>
+                <span class="material-symbols-rounded" style="font-size:20px;">inventory_2</span>
+                Total <span class="stat-count" id="totalProducts">0</span>
+            </div>
+            <div class="stat-pill success">
+                <span class="material-symbols-rounded" style="font-size:20px; color:#34c759;">check_circle</span>
+                <span class="btn-text">In Stock</span> <span class="stat-count" id="inStockCount">0</span>
+            </div>
+            <div class="stat-pill danger">
+                <span class="material-symbols-rounded" style="font-size:20px; color:#ff3b30;">cancel</span>
+                <span class="btn-text">Out</span> <span class="stat-count" id="outStockCount">0</span>
             </div>
         </div>
 
@@ -63,31 +72,33 @@
         </div>
     </div>
 
-    <!-- FAB (Mobile Add Button) -->
-    <button class="fab-add" onclick="addNewProduct()">
+    <!-- FAB -->
+    <button class="fab-add" onclick="addNewProduct()" aria-label="Add Product">
         <span class="material-symbols-rounded">add</span>
     </button>
 
     <!-- LOGIN MODAL -->
-    <div class="modal" id="loginModal" style="background:var(--bg-body); z-index:9000;">
-        <div class="modal-content" style="max-width:400px; text-align:center;">
-            <div
-                style="background:white; width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; box-shadow:var(--shadow-md);">
-                <span class="material-symbols-rounded" style="font-size:40px; color:var(--color-primary);">lock</span>
+    <div class="modal" id="loginModal" style="background:linear-gradient(135deg, #fff5f7, #faf0ff); z-index:9000;">
+        <div class="modal-content" style="max-width:380px; padding:40px; text-align:center;">
+            <div class="login-icon"
+                style="width:72px; height:72px; border-radius:22px; background:linear-gradient(135deg, #fff0f3, #ffe8f0); color:#ff477e; display:flex; align-items:center; justify-content:center; margin:0 auto 24px;">
+                <span class="material-symbols-rounded" style="font-size:32px;">lock</span>
             </div>
-            <h2 style="margin-bottom:8px; color:var(--color-primary);">Admin Access</h2>
-            <p style="color:#666; margin-bottom:24px;">Please enter your password to continue.</p>
+            <h2 style="margin-bottom:8px;">Admin Access</h2>
+            <p style="color:var(--text-gray); margin-bottom:24px; font-size:0.95rem;">Enter your password to continue
+            </p>
 
-            <p id="loginError" style="color:#d32f2f; font-weight:bold; display:none; margin-bottom:16px;">Incorrect
-                Password ❌</p>
+            <p id="loginError"
+                style="color:#ef4444; font-weight:bold; display:none; margin-bottom:16px; font-size:0.9rem;">
+                Incorrect Password ❌</p>
 
             <form onsubmit="login(event)">
                 <div class="form-group">
                     <input type="password" id="adminPassword" placeholder="Enter Password" required
-                        style="text-align:center;">
+                        style="text-align:center; padding:16px;">
                 </div>
-                <button type="submit" class="stat-pill"
-                    style="width:100%; justify-content:center; background:var(--color-primary); color:white; padding:16px;">
+                <button type="submit" class="btn-save" style="width:100%; padding:16px; font-size:1rem;">
+                    <span class="material-symbols-rounded" style="font-size:20px;">lock_open</span>
                     Unlock Dashboard
                 </button>
             </form>
@@ -97,10 +108,10 @@
     <!-- EDIT MODAL -->
     <div class="modal" id="editModal">
         <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                <h2 id="modalTitle" style="font-size:1.5rem;">Edit Product</h2>
-                <button onclick="closeModal()"
-                    style="padding:8px; background:#f5f5f5; border-radius:50%; display:flex;">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h2 id="modalTitle">Edit Product</h2>
+                <button class="btn-close" onclick="closeModal()">
                     <span class="material-symbols-rounded">close</span>
                 </button>
             </div>
@@ -108,108 +119,131 @@
             <form id="productForm" onsubmit="saveProduct(event)">
                 <input type="hidden" id="p_id">
 
-                <div class="form-group">
-                    <label>Product Name</label>
-                    <input id="p_name" required placeholder="e.g. Hello Kitty Bag">
-                </div>
+                <div class="modal-body">
+                    <!-- Basic Info -->
+                    <div class="modal-section">
+                        <div class="modal-section-title">Basic Info</div>
+                        <div class="form-group">
+                            <label>Product Name</label>
+                            <input id="p_name" required placeholder="e.g. Hello Kitty Bag">
+                        </div>
 
-                <div style="display:flex; gap:16px;">
-                    <div class="form-group" style="flex:1;">
-                        <label>Category</label>
-                        <select id="p_cat" required>
-                            <option value="autres">Autres</option>
-                            <option value="hellokitty">Hello Kitty</option>
-                            <option value="accessoires">Accessoires</option>
-                            <option value="deco">Déco</option>
-                        </select>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select id="p_cat" required>
+                                    <option value="autres">Autres</option>
+                                    <option value="hellokitty">Hello Kitty</option>
+                                    <option value="accessoires">Accessoires</option>
+                                    <option value="deco">Déco</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Badge</label>
+                                <input id="p_badge" placeholder="e.g. New">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+                            <input type="checkbox" id="p_bestSeller" style="width:20px; height:20px;">
+                            <label for="p_bestSeller"
+                                style="margin:0; cursor:pointer; text-transform:none; letter-spacing:0;">Best Seller
+                                🏆</label>
+                        </div>
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="modal-section">
+                        <div class="modal-section-title">Pricing</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Price (DH)</label>
+                                <input id="p_price" type="number" required placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Old Price</label>
+                                <input id="p_oldPrice" type="number" placeholder="Optional">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock -->
+                    <div class="modal-section">
+                        <div class="modal-section-title">Stock & Sizes</div>
+                        <div style="display:flex; gap:16px; margin-bottom:16px;">
+                            <div class="form-group"
+                                style="background:#f0fdf4; padding:14px 16px; border-radius:12px; display:flex; align-items:center; gap:12px; flex:1; border:1px solid #bbf7d0;">
+                                <input type="checkbox" id="p_inStock" style="width:22px; height:22px; margin:0;"
+                                    onchange="toggleSimpleStockInput()">
+                                <label
+                                    style="margin:0; flex:1; cursor:pointer; text-transform:none; letter-spacing:0; color:#16a34a;"
+                                    for="p_inStock">In Stock</label>
+                            </div>
+                            <div class="form-group" id="simpleStockContainer" style="flex:1;">
+                                <input type="number" id="p_simpleStock" placeholder="Quantity"
+                                    style="padding:14px; border-radius:12px;">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>📏 Sizes (comma separated)</label>
+                            <input id="p_sizes" placeholder="S, M, L" onblur="refreshVariantStockInputs()">
+                        </div>
+                    </div>
+
+                    <!-- Display -->
+                    <div class="modal-section">
+                        <div class="modal-section-title">Display</div>
+                        <div class="form-group">
+                            <label>Variant Style</label>
+                            <select id="p_variantStyle">
+                                <option value="color">Color Swatches (Circles)</option>
+                                <option value="button">Text Buttons (Numbered/Named)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Images -->
+                    <div class="modal-section">
+                        <div class="modal-section-title">Images</div>
+                        <div class="form-group">
+                            <label>Main Image</label>
+                            <input id="p_img" required placeholder="image.jpg">
+                        </div>
+                        <div class="form-group">
+                            <label>Gallery (comma separated)</label>
+                            <textarea id="p_images" rows="2" placeholder="img1.jpg, img2.jpg"
+                                style="font-family:monospace; font-size:0.9rem;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="modal-section">
+                        <div class="modal-section-title">Description</div>
+                        <div class="form-group">
+                            <textarea id="p_desc" rows="3" placeholder="Product description..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Variants -->
+                    <div class="modal-section">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <div class="modal-section-title" style="margin-bottom:0;">Variants</div>
+                            <button type="button" onclick="addVariantField()" class="btn-add-variant"
+                                style="width:auto; padding:6px 16px; margin-top:0;">
+                                <span class="material-symbols-rounded" style="font-size:18px;">add</span> Add
+                            </button>
+                        </div>
+                        <div id="variantsContainer"></div>
                     </div>
                 </div>
 
-                <div style="display:flex; gap:16px; align-items:center; margin-bottom:16px;">
-
-                    <div class="form-group" style="flex:1; display:flex; align-items:center; gap:8px;">
-                        <input type="checkbox" id="p_bestSeller" style="width:20px; height:20px;">
-                        <label for="p_bestSeller" style="margin:0; cursor:pointer;">Best Seller 🏆</label>
-                    </div>
-                </div>
-                <div style="display:flex; gap:16px;">
-                    <div class="form-group" style="flex:1;">
-                        <label>Price (DH)</label>
-                        <input id="p_price" type="number" required placeholder="0">
-                    </div>
-                    <div class="form-group" style="flex:1;">
-                        <label>Old Price</label>
-                        <input id="p_oldPrice" type="number" placeholder="Optional">
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top:16px;">
-                    <label>Variant Style</label>
-                    <select id="p_variantStyle">
-                        <option value="color">Color Swatches (Circles)</option>
-                        <option value="button">Text Buttons (Numbered/Named)</option>
-                    </select>
-                </div>
-
-                <!-- STOCK TOGGLE & QTY -->
-                <div style="display:flex; gap:16px; margin-bottom:16px;">
-                    <div class="form-group"
-                        style="background:#e8f5e9; padding:16px; border-radius:12px; display:flex; align-items:center; gap:12px; flex:1;">
-                        <input type="checkbox" id="p_inStock" style="width:24px; height:24px; margin:0;"
-                            onchange="toggleSimpleStockInput()">
-                        <label style="margin:0; flex:1; cursor:pointer;" for="p_inStock">In Stock</label>
-                    </div>
-                    <div class="form-group" id="simpleStockContainer" style="flex:1;">
-                        <input type="number" id="p_simpleStock" placeholder="Quantity"
-                            style="padding:16px; border-radius:12px; border:2px solid #eee;">
-                    </div>
-                </div>
-
-                <!-- Sizes -->
-                <div class="form-group" style="background:#e3f2fd; padding:16px; border-radius:12px; margin-top:16px;">
-                    <label style="color:#1565c0;">📏 Sizes</label>
-                    <input id="p_sizes" placeholder="S, M, L" onblur="refreshVariantStockInputs()"
-                        style="border-color:white;">
-                </div>
-
-                <!-- Images -->
-                <div class="form-group"
-                    style="background:#fff8e1; padding:16px; border-radius:12px; margin-top:16px; border:2px dashed #ffe0b2;">
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; color:#f57c00;">
-                        <span class="material-symbols-rounded">imagesmode</span>
-                        <h3 style="font-size:1rem;">Gallery</h3>
-                    </div>
-                    <div class="form-group">
-                        <input id="p_img" required placeholder="Main Image (image.jpg)" style="margin-bottom:8px;">
-                        <textarea id="p_images" rows="2" placeholder="Start typing... (img1.jpg, img2.jpg)"
-                            style="font-family:monospace; font-size:0.9rem;"></textarea>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top:16px;">
-                    <label>Description</label>
-                    <textarea id="p_desc" rows="3"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Badge</label>
-                    <input id="p_badge" placeholder="e.g. New">
-                </div>
-
-                <!-- VARIANTS -->
-                <div class="form-group" style="background:#fce4ec; padding:16px; border-radius:12px; margin-top:24px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:16px; align-items:center;">
-                        <label style="margin:0; color:#c2185b;">✨ Variants</label>
-                        <button type="button" onclick="addVariantField()"
-                            style="background:white; padding:6px 12px; border-radius:20px; font-size:0.8rem; font-weight:bold; color:#d81b60;">+
-                            Add</button>
-                    </div>
-                    <div id="variantsContainer"></div>
-                </div>
-
-                <div style="margin-top:32px;">
-                    <button type="submit" class="stat-pill"
-                        style="width:100%; justify-content:center; background:var(--color-primary); color:white; padding:16px; font-size:1.1rem;">
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-save">
+                        <span class="material-symbols-rounded" style="font-size:18px;">save</span>
                         Save Changes
                     </button>
                 </div>

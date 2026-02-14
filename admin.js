@@ -87,28 +87,40 @@ function renderAdminList(list = products) {
     // Update Stats
     document.getElementById('totalProducts').innerText = list.length;
 
+    // Compute in-stock / out-of-stock counts
+    let inStock = 0;
+    let outStock = 0;
+    list.forEach(p => {
+        if (isProductEffectiveOutOfStock(p)) outStock++;
+        else inStock++;
+    });
+    const inStockEl = document.getElementById('inStockCount');
+    const outStockEl = document.getElementById('outStockCount');
+    if (inStockEl) inStockEl.innerText = inStock;
+    if (outStockEl) outStockEl.innerText = outStock;
+
     if (list.length === 0) {
-        container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#888; padding:40px;">No products found.</div>';
+        container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-gray); padding:60px 20px;"><span class="material-symbols-rounded" style="font-size:48px; display:block; margin-bottom:12px; opacity:0.3;">inventory_2</span>No products found.</div>';
         return;
     }
 
     list.forEach((p, index) => {
         const div = document.createElement('div');
         div.className = 'p-card';
-        // Staggered Animation
-        div.style.animation = `slideUpFade 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.05}s forwards`;
-        div.style.opacity = '0'; // Start hidden
+        div.style.animationDelay = `${index * 0.04}s`;
 
         div.dataset.index = index; // For drag & drop
         div.draggable = true; // Enable drag
 
+        const oos = isProductEffectiveOutOfStock(p);
+
         div.innerHTML = `
             <div class="p-img-box">
-                <img src="${p.img}" class="p-img" loading="lazy">
-                ${p.badge ? `<span class="p-badge">${p.badge}</span>` : (p.isBestSeller ? `<span class="p-badge" style="background:linear-gradient(45deg, #FFD700, #FFA500);">Best Seller</span>` : '')}
-                <div class="toggle-stock ${isProductEffectiveOutOfStock(p) ? 'off' : ''}" onclick="toggleStock(${p.id}, ${!p.inStock})">
-                    <span class="material-symbols-rounded">${isProductEffectiveOutOfStock(p) ? 'cancel' : 'check_circle'}</span>
-                    ${isProductEffectiveOutOfStock(p) ? 'Out' : 'In Stock'}
+                <img src="${p.img}" class="p-img" loading="lazy" alt="${p.name}">
+                ${p.badge ? `<span class="p-badge">${p.badge}</span>` : (p.isBestSeller ? `<span class="p-badge" style="background:linear-gradient(45deg, #FFD700, #FFA500);">Best</span>` : '')}
+                <div class="toggle-stock ${oos ? 'off' : ''}" onclick="toggleStock(${p.id}, ${!p.inStock})">
+                    <span class="stock-dot"></span>
+                    ${oos ? 'Out' : 'In Stock'}
                 </div>
             </div>
             <div class="p-info">
@@ -361,6 +373,7 @@ function editProduct(id) {
     document.getElementById('p_cat').value = p.cat;
     document.getElementById('p_price').value = p.price;
     document.getElementById('p_oldPrice').value = p.oldPrice || '';
+
     document.getElementById('p_img').value = p.img;
     document.getElementById('p_desc').value = p.desc || '';
     document.getElementById('p_desc').value = p.desc || '';
