@@ -108,7 +108,6 @@ let selectedCity = null;
 let activeProductId = null;
 let activeVariantIndex = 0;
 let activeSize = null;
-// let inventory = {}; // Removed
 let pdpInterval = null; // Store interval ID
 
 // --- DOM CACHE ---
@@ -117,6 +116,26 @@ const elements = {}; // Cache for DOM elements
 // --- INVENTORY MANAGEMENT ---
 // Stock is managed directly in the products array (static).
 // No localStorage persistence for inventory.
+
+// --- CROSS-TAB SYNC ---
+// Listen for changes in other tabs to keep cart updated
+window.addEventListener('storage', (e) => {
+    if (e.key === 'cart_v24') {
+        console.log("Syncing cart from another tab...");
+        try {
+            cart = JSON.parse(e.newValue || '[]');
+            updateCart();
+            renderCartList(); // Refresh drawer if open
+            // If on checkout page, refresh items there too
+            if (document.getElementById('view-checkout').classList.contains('active')) {
+                renderCheckoutItems();
+                updateCheckoutTotal();
+            }
+        } catch (err) {
+            console.error("Sync error", err);
+        }
+    }
+});
 
 function getStock(id, variantIndex, size = null) {
     const p = products.find(x => x.id === id);
@@ -187,10 +206,6 @@ function isProductEffectiveOutOfStock(p) {
 
 }
 
-function reduceStock() {
-    // No-op. We do not reduce stock in this static version.
-}
-
 // --- INIT ---
 // Start fetching immediately
 fetchProducts();
@@ -216,8 +231,6 @@ function initApp() {
     elements.toast = document.getElementById('toast');
     elements.toastMsg = document.getElementById('toastMsg');
 
-    // Clear old inventory to avoid confusion if needed
-    localStorage.removeItem('inventory_v1');
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('product')) {
@@ -239,7 +252,6 @@ function initApp() {
     renderHero();
     renderHeroDots();
     startSlider();
-    renderShop(); // Ensure shop is rendered once DOM is ready
     renderCartList();
     updateCart();
     populateCities();
@@ -366,9 +378,9 @@ function createCard(p) {
     <div class="card ${isOutOfStock ? 'out-of-stock' : ''}" onclick="openProduct(${p.id})">
       <div class="card-img-box">
         ${badgeHtml}
-        <img src="${p.img}" class="card-img" alt="${p.name}" loading="lazy" decoding="async" width="300" height="330">
+        <img src="${p.img}" class="card-img" alt="${escapeHTML(p.name)}" loading="lazy" decoding="async" width="300" height="330" onerror="this.onerror=null;this.src='https://placehold.co/300x330?text=No+Image';">
       </div>
-      <h3>${p.name}</h3>
+      <h3>${escapeHTML(p.name)}</h3>
       <p>${priceDisplay}</p>
     </div>
   `;
@@ -444,12 +456,7 @@ function openProduct(id) {
     // Find first variant with stock > 0
     let firstAvailableIndex = 0;
     if (p.variants && p.variants.length > 0) {
-        // Need to check mapped inventory because stock might be boolean true -> 100
-        // But inventory might not be init yet if we just loaded page? 
-        // Safer to just check p.variants[i].stock if it's raw from products array? 
-        // Actually inventory is the source of truth.
-
-        // Let's iterate and check inventory
+        // Iterate and check stock
         for (let i = 0; i < p.variants.length; i++) {
             // Check real stock using helper (handles objects/sizes/booleans)
             const stock = getStock(p.id, i);
@@ -828,6 +835,29 @@ function renderCartList() {
         return;
     }
 
+    // If products haven't loaded yet, show a loading state instead of empty items
+    if (products.length === 0) {
+        list.innerHTML = `<div style="text-align:center; margin-top:60px; color:#ccc;">
+      <span class="material-symbols-rounded" style="font-size:48px; margin-bottom:16px; display:block; animation: spin 1s linear infinite;">sync</span>
+      <p style="font-size:1rem; font-weight:600;">Chargement...</p>
+    </div>`;
+        return;
+    }
+
+    // Clean stale cart items whose product no longer exists in the catalog
+    const validCart = cart.filter(item => products.some(p => p.id === item.id));
+    if (validCart.length !== cart.length) {
+        cart = validCart;
+        saveCart();
+        updateCart();
+    }
+
+    if (cart.length === 0) {
+        // All items were stale — show empty state
+        renderCartList();
+        return;
+    }
+
     const btn = elements.checkoutBtn;
     if (btn) {
         btn.disabled = false;
@@ -837,26 +867,49 @@ function renderCartList() {
     }
 
     let total = 0;
+    // --- RENDER CART LIST ---
+    let cartValid = true; // Flag to track if cart is valid for checkout
+
     list.innerHTML = cart.map((item, index) => {
         const p = products.find(x => x.id === item.id);
         if (!p) return '';
 
-        const variant = (p.variants && p.variants.length > 0) ? p.variants[item.variantIndex] : { name: "", hex: "transparent", img: p.img };
+        let variant = (p.variants && p.variants.length > 0) ? p.variants[item.variantIndex] : { name: "", hex: "transparent", img: p.img };
         const displayImg = variant.img || p.img;
         const sizeLabel = item.size ? ` · ${item.size}` : '';
-        const variantLabel = variant.name ? `${variant.name}${sizeLabel}` : sizeLabel;
+
+        // Fix: Don't show "Standard"
+        let variantName = variant.name === 'Standard' ? '' : variant.name;
+        const variantLabel = variantName ? `${variantName}${sizeLabel}` : (item.size ? item.size : '');
+
+        // --- STOCK VALIDATION ---
+        const currentStock = getStock(p.id, item.variantIndex, item.size);
+        const isOutOfStock = currentStock <= 0;
+        const isLowStock = !isOutOfStock && item.qty > currentStock;
+
+        // Error Message
+        let errorMsg = '';
+        if (isOutOfStock) {
+            errorMsg = `<div style="color:#ef4444; font-size:0.8rem; font-weight:600; margin-top:4px;">❌ Rupture de stock</div>`;
+            cartValid = false;
+        } else if (isLowStock) {
+            errorMsg = `<div style="color:#f59e0b; font-size:0.8rem; font-weight:600; margin-top:4px;">⚠️ Max disponible: ${currentStock}</div>`;
+            cartValid = false;
+        }
 
         total += p.price * item.qty;
+
         return `
-      <div class="cart-item">
+      <div class="cart-item ${!cartValid ? 'error-item' : ''}" style="${!cartValid ? 'background:#fff5f5;' : ''}">
         <div style="position:relative;">
-            <img src="${displayImg}" class="cart-img" alt="${p.name}">
+            <img src="${displayImg}" class="cart-img" alt="${escapeHTML(p.name)}" style="${isOutOfStock ? 'filter:grayscale(1); opacity:0.6;' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/100x100?text=No+Image';">
             ${variant.hex !== "transparent" ? `<div style="position:absolute; bottom:-2px; right:-2px; background:${variant.hex}; width:18px; height:18px; border-radius:50%; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.15);"></div>` : ''}
         </div>
         <div style="flex:1; min-width:0;">
-          <h4 style="margin-bottom:4px; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</h4>
+          <h4 style="margin-bottom:4px; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(p.name)}</h4>
           ${variantLabel ? `<div style="font-size:0.8rem; color:var(--text-gray); margin-bottom:4px;">${variantLabel}</div>` : ''}
           <div style="color:var(--color-primary); font-weight:700; font-size:0.95rem;">${p.price} DH</div>
+          ${errorMsg}
         </div>
         <div class="qty-ctrl">
            <span onclick="updateQty(${index}, -1)">−</span>
@@ -870,9 +923,26 @@ function renderCartList() {
     `;
     }).join('');
 
+    // Toggle Checkout Button
+    if (btn) {
+        if (cartValid) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.innerText = "Commander";
+            btn.classList.remove('btn-disabled');
+        } else {
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.style.cursor = 'not-allowed';
+            btn.innerText = "Stock Insuffisant";
+            btn.classList.add('btn-disabled');
+        }
+    }
+
     if (elements.drawerTotal) elements.drawerTotal.innerText = `${total} DH`;
     updateCheckoutTotal();
-    renderCheckoutItems();
+    renderCheckoutItems(); // Sync checkout view too
 }
 
 function renderCheckoutItems() {
@@ -887,19 +957,24 @@ function renderCheckoutItems() {
     container.innerHTML = cart.map(item => {
         const p = products.find(prod => prod.id === item.id);
         if (!p) return '';
-        const variant = (p.variants && p.variants.length > 0) ? p.variants[item.variantIndex] : { name: "", img: p.img };
+
+        let variant = (p.variants && p.variants.length > 0) ? p.variants[item.variantIndex] : { name: "", img: p.img };
         const displayImg = variant.img || p.img;
+
+        // Hide "Standard" name
+        const variantName = variant.name === 'Standard' ? '' : variant.name;
         const sizeLabel = item.size ? ` - ${item.size}` : '';
+        const variantLabel = variantName ? `${variantName}${sizeLabel}` : (item.size ? item.size : '');
 
         return `
             <div style="display:flex; gap:16px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px dashed #eee; align-items:center;">
                 <div style="position:relative; flex-shrink:0;">
-                    <img src="${displayImg}" style="width:60px; height:60px; border-radius:12px; object-fit:cover; background:#f4f4f6;" loading="lazy">
+                    <img src="${displayImg}" style="width:60px; height:60px; border-radius:12px; object-fit:cover; background:#f4f4f6;" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/100x100?text=No+Image';">
                     <div style="position:absolute; top:-6px; right:-6px; background:var(--text-dark); color:white; width:22px; height:22px; border-radius:50%; font-size:0.8rem; display:flex; align-items:center; justify-content:center; border:2px solid white; font-weight:700;">${item.qty}</div>
                 </div>
                 <div style="flex:1;">
-                   <div style="font-weight:700; font-size:1rem; margin-bottom:4px;">${p.name}</div>
-                   <div style="color:var(--text-gray); font-size:0.9rem;">${variant.name}${sizeLabel}</div>
+                   <div style="font-weight:700; font-size:1rem; margin-bottom:4px;">${escapeHTML(p.name)}</div>
+                   <div style="color:var(--text-gray); font-size:0.9rem;">${variantLabel}</div>
                 </div>
                 <div style="font-weight:700; font-size:1.05rem;">${p.price * item.qty} DH</div>
             </div>
@@ -975,12 +1050,15 @@ function selectCity(city) {
     updateCheckoutTotal();
 }
 
-function updateCheckoutTotal() {
-    const cartTotal = cart.reduce((sum, item) => {
+function getCartTotal() {
+    return cart.reduce((sum, item) => {
         const p = products.find(prod => prod.id === item.id);
         return sum + (p ? p.price * item.qty : 0);
     }, 0);
+}
 
+function updateCheckoutTotal() {
+    const cartTotal = getCartTotal();
     const shipping = selectedCity ? selectedCity.price : 0;
     const grandTotal = cartTotal + shipping;
 
@@ -1003,40 +1081,55 @@ function updateCheckoutTotal() {
 async function submitOrder(event) {
     event.preventDefault();
 
-    const name = document.getElementById('cxName').value;
-    const phone = document.getElementById('cxPhone').value;
+    const name = document.getElementById('cxName').value.trim();
+    let phone = document.getElementById('cxPhone').value.replace(/\s+/g, ''); // Remove spaces
     const cityVal = document.getElementById('cxCityValue').value;
-    const address = document.getElementById('cxAddress').value;
+    const address = document.getElementById('cxAddress').value.trim();
 
     if (!name || !cityVal || !phone || !address) {
-        if (!cityVal) showToast("Veuillez sélectionner une ville");
-        else showToast("Veuillez remplir tous les champs");
+        if (!cityVal) showToast("Veuillez sélectionner une ville 🏙️");
+        else showToast("Veuillez remplir tous les champs ✍️");
         return;
     }
 
-    const cartTotal = cart.reduce((sum, item) => {
-        const p = products.find(prod => prod.id === item.id);
-        return sum + (p ? p.price * item.qty : 0);
-    }, 0);
+    // Phone Validation: Relaxed (Just check length to allow Intl numbers)
+    if (phone.length < 5) {
+        showToast("Numéro de téléphone trop court 📱");
+        return;
+    }
+
+    // Address Validation: Min 4 chars
+    if (address.length < 4) {
+        showToast("L'adresse est trop courte (min 4 caractères) 📍");
+        return;
+    }
+
+    const cartTotal = getCartTotal();
     const shipping = selectedCity ? selectedCity.price : 0;
     const grandTotal = cartTotal + shipping;
 
     const itemsString = cart.map(item => {
         const p = products.find(prod => prod.id === item.id);
         if (!p) return 'Unknown';
-        const variant = (p.variants && p.variants.length > 0) ? p.variants[item.variantIndex] : { name: "Standard" };
+
+        let variant = (p.variants && p.variants.length > 0) ? p.variants[item.variantIndex] : { name: "" };
+        // Fix: If variant name is "Standard", ignore it
+        const variantName = (variant.name === 'Standard') ? '' : variant.name;
+
         const sizeLabel = item.size ? ` [${item.size}]` : '';
-        return `${p.name} [${variant.name}]${sizeLabel} (x${item.qty})`;
+        const variantDisplay = variantName ? ` [${variantName}]` : '';
+
+        return `${p.name}${variantDisplay}${sizeLabel} (x${item.qty})`;
     }).join(', ');
 
     const formData = new FormData();
-    formData.append(GOOGLE_FORM_ENTRY_IDS.name, name);
-    formData.append(GOOGLE_FORM_ENTRY_IDS.phone, phone);
-    formData.append(GOOGLE_FORM_ENTRY_IDS.city, cityVal);
-    formData.append(GOOGLE_FORM_ENTRY_IDS.address, address);
-    formData.append(GOOGLE_FORM_ENTRY_IDS.items, itemsString);
+    formData.append(GOOGLE_FORM_ENTRY_IDS.name, sanitizeCSV(name));
+    formData.append(GOOGLE_FORM_ENTRY_IDS.phone, sanitizeCSV(phone));
+    formData.append(GOOGLE_FORM_ENTRY_IDS.city, sanitizeCSV(cityVal));
+    formData.append(GOOGLE_FORM_ENTRY_IDS.address, sanitizeCSV(address));
+    formData.append(GOOGLE_FORM_ENTRY_IDS.items, itemsString); // Items are built by us, safeish, but could also sanitize if paranoid
     formData.append(GOOGLE_FORM_ENTRY_IDS.total, `${grandTotal} DH`);
-    formData.append(GOOGLE_FORM_ENTRY_IDS.notes, '');
+    formData.append(GOOGLE_FORM_ENTRY_IDS.notes, sanitizeCSV(''));
 
     const btn = event.target.querySelector('button[type="submit"]');
     const originalText = btn.innerText;
@@ -1044,28 +1137,37 @@ async function submitOrder(event) {
     btn.disabled = true;
 
     try {
-        // 1. DEDUCT STOCK via API
-        const orderRes = await fetch(`${API_URL}/api/orders`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: cart })
-        });
+        // PARALLEL EXECUTION: Speed + Safety
+        // 1. DEDUCT STOCK (Critical for Inventory)
+        const stockPromise = (async () => {
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Le serveur de stock ne répond pas ⏳")), 15000)
+            );
+            const apiPromise = fetch(`${API_URL}/api/orders`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: cart })
+            });
+            const res = await Promise.race([apiPromise, timeoutPromise]);
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || "Stock Error");
+            }
+            return res;
+        })();
 
-        if (!orderRes.ok) {
-            const errData = await orderRes.json();
-            throw new Error(errData.error || "Order validation failed");
-        }
-
-        // 2. LOG to GOODLE SHEETS (Backup / Admin notification)
-        // We do this in parallel or after, but if this fails we still have the order in our system theoretically.
-        // But here we're just using Forms as the MAIN notifier for now.
-
-        await fetch(GOOGLE_FORM_URL, {
+        // 2. GOOGLE FORMS (Critical for Customer Details)
+        // We MUST await this because it's the only place saving the Name/Address!
+        const googlePromise = fetch(GOOGLE_FORM_URL, {
             method: 'POST',
             mode: 'no-cors',
             body: formData
         });
 
+        // Wait for BOTH to succeed
+        await Promise.all([stockPromise, googlePromise]);
+
+        // 3. SUCCESS
         showToast(`Commande reçue! Merci ${name.split(' ')[0]} ✨`);
 
         // We don't need local reduceStock anymore, as we will re-fetch products
@@ -1082,8 +1184,9 @@ async function submitOrder(event) {
         console.error('Order submission failed:', error);
         if (error.message.includes("Stock insuffisant")) {
             showToast(error.message + " ⚠️");
-            // Refresh to get latest stock
+            // Refresh to get latest stock AND wipe cart via render
             await fetchProducts();
+            renderCartList(); // This triggers the strict wipe logic
         } else {
             showToast("Erreur de connexion. Veuillez réessayer.");
         }
@@ -1109,6 +1212,30 @@ function showToast(msg) {
     tMsg.innerText = msg;
     t.classList.add('active');
     toastTimer = setTimeout(() => t.classList.remove('active'), 3000);
+}
+
+// Security: Prevent XSS
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, function (m) {
+        switch (m) {
+            case '&': return '&amp;';
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '"': return '&quot;';
+            case "'": return '&#039;';
+        }
+    });
+}
+
+// Security: Prevent CSV Injection in Google Sheets
+function sanitizeCSV(str) {
+    if (!str) return '';
+    // If it starts with dangerous chars, prepend a single quote to force text interpretation
+    if (/^[=+\-@]/.test(str)) {
+        return "'" + str;
+    }
+    return str;
 }
 
 // Cities Data

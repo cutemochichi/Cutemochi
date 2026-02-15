@@ -86,14 +86,8 @@ function renderAdminList(list = products) {
 
     // Update Stats
     document.getElementById('totalProducts').innerText = list.length;
-
-    // Compute in-stock / out-of-stock counts
-    let inStock = 0;
-    let outStock = 0;
-    list.forEach(p => {
-        if (isProductEffectiveOutOfStock(p)) outStock++;
-        else inStock++;
-    });
+    let inStock = 0, outStock = 0;
+    list.forEach(p => { if (isProductEffectiveOutOfStock(p)) outStock++; else inStock++; });
     const inStockEl = document.getElementById('inStockCount');
     const outStockEl = document.getElementById('outStockCount');
     if (inStockEl) inStockEl.innerText = inStock;
@@ -109,12 +103,15 @@ function renderAdminList(list = products) {
         div.className = 'p-card';
         div.style.animationDelay = `${index * 0.04}s`;
 
-        div.dataset.index = index; // For drag & drop
-        div.draggable = true; // Enable drag
+        div.dataset.id = p.id;
 
         const oos = isProductEffectiveOutOfStock(p);
+        const globalIndex = products.indexOf(p);
 
         div.innerHTML = `
+            <div class="drag-handle" title="Drag to reorder">
+                <span class="material-symbols-rounded">drag_indicator</span>
+            </div>
             <div class="p-img-box">
                 <img src="${p.img}" class="p-img" loading="lazy" alt="${p.name}">
                 ${p.badge ? `<span class="p-badge">${p.badge}</span>` : (p.isBestSeller ? `<span class="p-badge" style="background:linear-gradient(45deg, #FFD700, #FFA500);">Best</span>` : '')}
@@ -122,6 +119,7 @@ function renderAdminList(list = products) {
                     <span class="stock-dot"></span>
                     ${oos ? 'Out' : 'In Stock'}
                 </div>
+                <span class="p-position-badge">#${globalIndex + 1}</span>
             </div>
             <div class="p-info">
                 <h3 class="p-title">${p.name}</h3>
@@ -141,7 +139,7 @@ function renderAdminList(list = products) {
         `;
         container.appendChild(div);
     });
-    setupDragAndDrop(); // Re-apply drag and drop after rendering
+    setupDragAndDrop();
 }
 
 function filterProducts() {
@@ -236,114 +234,163 @@ async function toggleStock(id, status) {
 }
 
 // --- DRAG AND DROP ---
+let touchDragCard = null;
+let touchClone = null;
+let touchOffsetY = 0;
+
 function setupDragAndDrop() {
-    const cards = document.querySelectorAll('.p-card'); // Changed from .product-card to .p-card
+    const cards = document.querySelectorAll('.p-card');
     const container = document.getElementById('productList');
 
     cards.forEach(card => {
-        card.addEventListener('dragstart', e => {
+        const handle = card.querySelector('.drag-handle');
+        if (!handle) return;
+
+        // Make only the handle trigger drag on desktop
+        handle.setAttribute('draggable', 'true');
+
+        // --- DESKTOP DRAG ---
+        handle.addEventListener('dragstart', e => {
             draggedItem = card;
-            setTimeout(() => card.style.opacity = '0.5', 0);
+            card.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => card.style.opacity = '0.35', 0);
         });
 
         card.addEventListener('dragend', () => {
-            setTimeout(() => {
-                draggedItem.style.opacity = '1';
-                draggedItem = null;
-                // Re-sync products array order based on DOM
-                updateProductOrder();
-            }, 0);
+            card.classList.remove('dragging');
+            card.style.opacity = '';
+            document.querySelectorAll('.p-card.drag-over').forEach(c => c.classList.remove('drag-over'));
+            draggedItem = null;
+            syncProductOrderFromDOM();
         });
 
         card.addEventListener('dragover', e => {
             e.preventDefault();
-            const afterElement = getDragAfterElement(container, e.clientY);
-            if (afterElement == null) {
-                container.appendChild(draggedItem);
-            } else {
-                container.insertBefore(draggedItem, afterElement);
+            e.dataTransfer.dropEffect = 'move';
+            if (card !== draggedItem && draggedItem) {
+                document.querySelectorAll('.p-card.drag-over').forEach(c => c.classList.remove('drag-over'));
+                card.classList.add('drag-over');
+                const allCards = [...container.querySelectorAll('.p-card')];
+                const fromIdx = allCards.indexOf(draggedItem);
+                const toIdx = allCards.indexOf(card);
+                if (fromIdx < toIdx) card.after(draggedItem);
+                else card.before(draggedItem);
+            }
+        });
+
+        card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+
+        card.addEventListener('drop', e => {
+            e.preventDefault();
+            card.classList.remove('drag-over');
+        });
+
+        // --- TOUCH DRAG (Mobile) ---
+        handle.addEventListener('touchstart', e => {
+            e.preventDefault();
+            touchDragCard = card;
+            const touch = e.touches[0];
+            const rect = card.getBoundingClientRect();
+            touchOffsetY = touch.clientY - rect.top;
+            card.classList.add('dragging');
+
+            touchClone = card.cloneNode(true);
+            touchClone.classList.add('touch-clone');
+            touchClone.style.width = rect.width + 'px';
+            touchClone.style.top = rect.top + 'px';
+            touchClone.style.left = rect.left + 'px';
+            document.body.appendChild(touchClone);
+        }, { passive: false });
+
+        handle.addEventListener('touchmove', e => {
+            if (!touchDragCard || !touchClone) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            touchClone.style.top = (touch.clientY - touchOffsetY) + 'px';
+
+            const allCards = [...container.querySelectorAll('.p-card')];
+            for (const c of allCards) {
+                if (c === touchDragCard) continue;
+                const cRect = c.getBoundingClientRect();
+                const centerY = cRect.top + cRect.height / 2;
+                if (touch.clientY > cRect.top && touch.clientY < cRect.bottom) {
+                    c.classList.add('drag-over');
+                    if (touch.clientY < centerY) c.before(touchDragCard);
+                    else c.after(touchDragCard);
+                } else {
+                    c.classList.remove('drag-over');
+                }
+            }
+        }, { passive: false });
+
+        handle.addEventListener('touchend', () => {
+            if (touchClone) { touchClone.remove(); touchClone = null; }
+            if (touchDragCard) {
+                touchDragCard.classList.remove('dragging');
+                document.querySelectorAll('.p-card.drag-over').forEach(c => c.classList.remove('drag-over'));
+                touchDragCard = null;
+                syncProductOrderFromDOM();
             }
         });
     });
 }
 
-function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.p-card:not(.dragging)')]; // Changed from .product-card to .p-card
-
-    return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-        } else {
-            return closest;
-        }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
-
-function updateProductOrder() {
-    // Read DOM order to re-sort 'products' array
-    const newOrder = [];
+function syncProductOrderFromDOM() {
     const container = document.getElementById('productList');
-    container.querySelectorAll('.p-card').forEach(card => { // Changed from .product-card to .p-card
-        const index = parseInt(card.dataset.index);
-        newOrder.push(products[index]);
+    const reordered = [];
+    container.querySelectorAll('.p-card').forEach(card => {
+        const id = parseInt(card.dataset.id);
+        const p = products.find(x => x.id === id);
+        if (p) reordered.push(p);
     });
 
-    // We can't just push(products[index]) because indices shift during drag if using this logic blindly,
-    // but here we are mapping old index to object reference.
-    // Actually, mapping existing objects by their original index is safe IF we don't mutate products array in-place during the loop.
-
-    // Wait, the DOM cards have data-index from the *render time*.
-    // If I drag card #0 to position #1, I now have card[data-index=0] at pos 1.
-    // So if I iterate DOM and pick objects, I get the right new order.
-
-    // Create new array based on DOM order
-    const reorderedProducts = [];
-    container.querySelectorAll('.p-card').forEach(card => { // Changed from .product-card to .p-card
-        const originalIndex = parseInt(card.dataset.index);
-        reorderedProducts.push(products[originalIndex]);
-    });
-
-    // Update global array (mutate in place to keep reference)
     products.length = 0;
-    products.push(...reorderedProducts);
+    products.push(...reordered);
 
-    // Re-render to update data-indices
     renderAdminList(products);
-
-    // Sync with Server
     saveOrderToServer();
 }
 
+let saveOrderTimeout = null;
 async function saveOrderToServer() {
-    const updates = products.map((p, index) => ({
-        id: p.id,
-        order: index
-    }));
+    // Debounce rapid moves (e.g. holding button)
+    clearTimeout(saveOrderTimeout);
+    saveOrderTimeout = setTimeout(async () => {
+        const updates = products.map((p, index) => ({
+            id: p.id,
+            order: index
+        }));
 
-    try {
-        // Show saving state helper? (Optional, maybe just console for now or toast)
+        // Remove any existing toast first
+        document.querySelectorAll('.toast-saving').forEach(t => t.remove());
+
         const toast = document.createElement('div');
         toast.className = 'toast-saving';
-        toast.innerText = 'Saving order...';
+        toast.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;animation:spin 1s linear infinite;">sync</span> Saving order...';
         document.body.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add('show'));
 
-        const res = await fetch(`${API_URL}/api/reorder`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ updates })
-        });
+        try {
+            const res = await fetch(`${API_URL}/api/reorder`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ updates })
+            });
 
-        if (!res.ok) throw new Error("Failed to save order");
+            if (!res.ok) throw new Error("Failed to save order");
 
-        toast.innerText = 'Order Saved! ✅';
-        setTimeout(() => toast.remove(), 2000);
+            toast.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;">check_circle</span> Order Saved!';
+            toast.classList.add('success');
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 1500);
 
-    } catch (err) {
-        console.error(err);
-        alert("Failed to save order to server");
-    }
+        } catch (err) {
+            console.error(err);
+            toast.innerHTML = '<span class="material-symbols-rounded" style="font-size:16px;">error</span> Failed to save';
+            toast.classList.add('error');
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+    }, 400);
 }
 
 
@@ -378,7 +425,7 @@ function editProduct(id) {
     document.getElementById('p_desc').value = p.desc || '';
     document.getElementById('p_desc').value = p.desc || '';
     document.getElementById('p_badge').value = p.badge || '';
-    document.getElementById('p_bestSeller').checked = (p.isBestSeller === true);
+    // document.getElementById('p_bestSeller').checked = (p.isBestSeller === true); // Removed per user request
     document.getElementById('p_inStock').checked = (p.inStock !== false);
     document.getElementById('p_variantStyle').value = p.variantStyle || 'color'; // Load style
     document.getElementById('p_images').value = (p.images && Array.isArray(p.images)) ? p.images.join(', ') : '';
@@ -692,7 +739,9 @@ async function saveProduct(e) {
     const desc = document.getElementById('p_desc').value;
     const variantStyle = document.getElementById('p_variantStyle').value; // Get variant style
     let badge = document.getElementById('p_badge').value;
-    const isBestSeller = document.getElementById('p_bestSeller').checked;
+
+    // Auto-determine Best Seller status from badge text
+    const isBestSeller = badge && badge.toLowerCase().includes('best');
 
     if (!badge) {
         badge = null;

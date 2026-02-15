@@ -1,0 +1,8 @@
+name = "newcute-api"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "newcute-db"
+database_id = "baff1a0f-2499-4330-9112-369ff6eee304"

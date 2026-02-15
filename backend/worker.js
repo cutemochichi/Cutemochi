@@ -55,7 +55,7 @@ export default {
                 }));
 
                 return new Response(JSON.stringify(products), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 's-maxage=60, max-age=10' },
                 });
             }
 
@@ -85,8 +85,6 @@ export default {
                     data.sizes ? JSON.stringify(data.sizes) : null,
                     data.variants ? JSON.stringify(data.variants) : null,
                     data.images ? JSON.stringify(data.images) : null,
-                    data.variantStyle || null,
-                    data.requireVariantSelection ? 1 : 0,
                     data.variantStyle || null,
                     data.requireVariantSelection ? 1 : 0,
                     newOrderIndex,
@@ -124,7 +122,6 @@ export default {
                     data.sizes ? JSON.stringify(data.sizes) : null,
                     data.variants ? JSON.stringify(data.variants) : null,
                     data.images ? JSON.stringify(data.images) : null,
-                    data.variantStyle || null,
                     data.variantStyle || null,
                     data.requireVariantSelection ? 1 : 0,
                     data.isBestSeller ? 1 : 0,
